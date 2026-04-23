@@ -22,6 +22,20 @@ const LINKS = [
   { id: '3', label: 'Privacy', icon: Shield, url: `${BASE_URL}/privacy` },
 ];
 
+const DEVELOPERS = [
+  {
+    id: '1',
+    name: 'Adlei Jed Tan',
+    githubLabel: 'github: ajt28-dev',
+    githubUrl: 'https://github.com/ajt28-dev',
+  },
+  {
+    id: '2',
+    name: 'Richmond C. Constante',
+    githubLabel: 'github: rcconstante.dev',
+  },
+];
+
 function openWebView(label: string, url?: string) {
   if (!url) return;
   router.push(`/webview?url=${encodeURIComponent(url)}&title=${encodeURIComponent(label)}` as any);
@@ -81,15 +95,19 @@ export default function SettingsScreen() {
         </TouchableOpacity>
 
         {/* Developer */}
-        <View style={styles.devCard}>
-          <Code size={20} color="#6DBE75" strokeWidth={2} />
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.devName}>Richmond C. Constnate</Text>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.devLink}>github: rcconstante.dev</Text>
-            </TouchableOpacity>
-          </View>
-          <ExternalLink size={16} color="#9CA3AF" />
+        <View style={styles.devList}>
+          {DEVELOPERS.map((dev) => (
+            <View key={dev.id} style={styles.devCard}>
+              <Code size={20} color="#6DBE75" strokeWidth={2} />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.devName}>{dev.name}</Text>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => openWebView(dev.name, dev.githubUrl)}>
+                  <Text style={styles.devLink}>{dev.githubLabel}</Text>
+                </TouchableOpacity>
+              </View>
+              <ExternalLink size={16} color="#9CA3AF" />
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -107,7 +125,8 @@ const styles = StyleSheet.create({
   menuValue: { fontSize: 13, fontWeight: '500', color: '#9CA3AF' },
   rateBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'center', marginTop: 30, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 12, paddingHorizontal: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
   rateText: { fontSize: 14, fontWeight: '700', color: '#1F2937' },
-  devCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, marginTop: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
+  devList: { marginTop: 24, gap: 10 },
+  devCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
   devName: { fontSize: 14, fontWeight: '700', color: '#1F2937' },
   devLink: { fontSize: 12, color: '#6DBE75', marginTop: 2 },
 });
