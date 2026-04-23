@@ -1,19 +1,38 @@
 import { Tabs } from 'expo-router';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Home, MessageCircle, Plus, User, ShieldCheck } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Home, MessageCircle, Plus, Settings, ShieldCheck } from 'lucide-react-native';
 
-function TabIcon({ focused, icon: Icon }: { focused: boolean; icon: typeof Home }) {
+function TabItem({
+  focused,
+  icon: Icon,
+  label,
+}: {
+  focused: boolean;
+  icon: typeof Home;
+  label: string;
+}) {
   return (
-    <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
-      <Icon size={22} color={focused ? '#6DBE75' : '#9CA3AF'} strokeWidth={focused ? 2.5 : 1.8} />
+    <View style={[styles.tabPill, focused && styles.tabPillActive]}>
+      <Icon
+        size={20}
+        color={focused ? '#FFFFFF' : '#9CA3AF'}
+        strokeWidth={focused ? 2.5 : 1.8}
+      />
+      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>{label}</Text>
     </View>
   );
 }
 
-function CenterButton() {
+function CenterTabButton(props: any) {
   return (
-    <TouchableOpacity activeOpacity={0.8} style={styles.centerButton}>
-      <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
+    <TouchableOpacity
+      {...props}
+      activeOpacity={0.8}
+      style={[props.style, styles.centerButtonWrapper]}
+    >
+      <View style={styles.centerButton}>
+        <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
+      </View>
     </TouchableOpacity>
   );
 }
@@ -23,46 +42,46 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarStyle: styles.tabBar,
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: '#6DBE75',
-        tabBarInactiveTintColor: '#9CA3AF',
-        tabBarLabelStyle: styles.tabLabel,
+        tabBarItemStyle: styles.tabItem,
+        tabBarIconStyle: styles.tabIcon,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={Home} />,
+          tabBarIcon: ({ focused }) => <TabItem focused={focused} icon={Home} label="Home" />,
         }}
       />
       <Tabs.Screen
         name="ai-assistant"
         options={{
-          title: 'AI Assistant',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={MessageCircle} />,
+          tabBarIcon: ({ focused }) => (
+            <TabItem focused={focused} icon={MessageCircle} label="AI" />
+          ),
         }}
       />
       <Tabs.Screen
         name="post-job"
         options={{
-          title: '',
-          tabBarButton: () => <CenterButton />,
+          tabBarButton: (props) => <CenterTabButton {...props} />,
         }}
       />
       <Tabs.Screen
         name="find-fixer"
         options={{
-          title: 'Find Fixer',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={ShieldCheck} />,
+          tabBarIcon: ({ focused }) => (
+            <TabItem focused={focused} icon={ShieldCheck} label="Fixers" />
+          ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="settings"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={User} />,
+          tabBarIcon: ({ focused }) => (
+            <TabItem focused={focused} icon={Settings} label="Settings" />
+          ),
         }}
       />
     </Tabs>
@@ -73,34 +92,59 @@ const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
     bottom: 24,
-    left: 16,
-    right: 16,
-    height: 72,
+    left: 0,
+    right: 0,
+    marginHorizontal: 24,
+    height: 64,
     borderRadius: 32,
     backgroundColor: 'rgba(255,255,255,0.92)',
     borderTopWidth: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 10,
-    paddingHorizontal: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 12,
     paddingBottom: 0,
+    paddingTop: 0,
+    paddingHorizontal: 8,
+  },
+  tabItem: {
+    height: 64,
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  tabIcon: {
+    width: '100%',
+    height: 64,
+    flex: 1,
+    marginBottom: 0,
+  },
+  tabPill: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 24,
+    minWidth: 76,
+    gap: 3,
+  },
+  tabPillActive: {
+    backgroundColor: '#6DBE75',
   },
   tabLabel: {
     fontSize: 10,
     fontWeight: '600',
-    marginTop: 2,
+    color: '#9CA3AF',
+    letterSpacing: 0.2,
   },
-  iconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+  tabLabelActive: {
+    color: '#FFFFFF',
+  },
+  centerButtonWrapper: {
+    marginTop: -20,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconWrapperActive: {
-    backgroundColor: '#E8F5E9',
+    height: 64,
   },
   centerButton: {
     width: 56,
@@ -109,7 +153,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#6DBE75',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
     shadowColor: '#6DBE75',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,

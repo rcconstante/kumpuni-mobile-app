@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Mic, Send, ThumbsUp, ThumbsDown, Droplets, Wind, PaintBucket } from 'lucide-react-native';
+import { Mic, Send, ThumbsUp, ThumbsDown, Droplets, Wrench, AlertTriangle, CheckCircle2 } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 const STEPS = [
   'Turn off the water supply under the sink.',
@@ -12,42 +13,93 @@ const STEPS = [
 
 const CHIPS = ['How do I clean my AC filter?', 'What paint works best for bathroom?'];
 
+const MOCK_ANALYSIS = [
+  { icon: AlertTriangle, text: 'Possible worn-out washer or loose mounting nut at the faucet base.', type: 'warning' },
+  { icon: Wrench, text: 'Tools needed: adjustable wrench, replacement washer, plumber tape.', type: 'info' },
+  { icon: CheckCircle2, text: 'Estimated fix time: 10-15 minutes. Cost: under $5.', type: 'success' },
+];
+
 export default function AIAssistantScreen() {
   const [input, setInput] = useState('');
+  const { photo } = useLocalSearchParams<{ photo?: string }>();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <Text style={styles.title}>AI Assistant</Text>
-          <Text style={styles.subtitle}>Your home. Your questions. Instant answers.</Text>
-        </View>
-
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-          {/* User bubble */}
-          <View style={styles.userBubble}>
-            <Text style={styles.userText}>My faucet is leaking from the base, what could be the cause?</Text>
-          </View>
-          <Text style={styles.timeLabel}>Just now</Text>
-
-          {/* AI bubble */}
-          <View style={styles.aiBubble}>
-            <View style={styles.aiImageWrap}>
-              <Droplets size={40} color="#6DBE75" strokeWidth={1.5} />
+          {/* Hero with mascot */}
+          <View style={styles.heroCard}>
+            <Image
+              source={require('@/assets/images/assistant.png')}
+              style={{ width: 120, height: 120, marginLeft: -10, marginBottom: -16 }}
+              resizeMode="contain"
+            />
+            <View style={styles.heroText}>
+              <Text style={styles.heroTitle}>AI Assistant</Text>
+              <Text style={styles.heroSub}>Your home. Your questions. Instant answers.</Text>
             </View>
-            <Text style={styles.aiText}>Quick Fix Steps</Text>
           </View>
 
-          {/* Steps card */}
-          <View style={styles.stepsCard}>
-            {STEPS.map((step, i) => (
-              <View key={i} style={styles.stepRow}>
-                <View style={styles.stepNumber}><Text style={styles.stepNumberText}>{i + 1}</Text></View>
-                <Text style={styles.stepText}>{step}</Text>
+          {/* Photo analysis from camera */}
+          {photo && (
+            <>
+              <View style={styles.userBubble}>
+                <Text style={styles.userText}>I took a photo of the issue. Can you help?</Text>
               </View>
-            ))}
-            <Text style={styles.stepNote}>It's usually an inexpensive fix!</Text>
-          </View>
+              <Text style={styles.timeLabel}>Just now</Text>
+
+              <Image source={{ uri: photo }} style={styles.capturedPhoto} />
+
+              <View style={styles.aiBubble}>
+                <View style={styles.aiImageWrap}>
+                  <Droplets size={40} color="#6DBE75" strokeWidth={1.5} />
+                </View>
+                <Text style={styles.aiText}>Photo Analysis</Text>
+              </View>
+
+              <View style={styles.stepsCard}>
+                {MOCK_ANALYSIS.map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <View key={i} style={styles.stepRow}>
+                      <View style={[styles.stepNumber, item.type === 'warning' && styles.stepWarning, item.type === 'success' && styles.stepSuccess]}>
+                        <Icon size={14} color={item.type === 'warning' ? '#F59E0B' : item.type === 'success' ? '#6DBE75' : '#6DBE75'} strokeWidth={2.5} />
+                      </View>
+                      <Text style={styles.stepText}>{item.text}</Text>
+                    </View>
+                  );
+                })}
+                <Text style={styles.stepNote}>Would you like to connect with a nearby plumber?</Text>
+              </View>
+            </>
+          )}
+
+          {/* Default demo conversation */}
+          {!photo && (
+            <>
+              <View style={styles.userBubble}>
+                <Text style={styles.userText}>My faucet is leaking from the base, what could be the cause?</Text>
+              </View>
+              <Text style={styles.timeLabel}>Just now</Text>
+
+              <View style={styles.aiBubble}>
+                <View style={styles.aiImageWrap}>
+                  <Droplets size={40} color="#6DBE75" strokeWidth={1.5} />
+                </View>
+                <Text style={styles.aiText}>Quick Fix Steps</Text>
+              </View>
+
+              <View style={styles.stepsCard}>
+                {STEPS.map((step, i) => (
+                  <View key={i} style={styles.stepRow}>
+                    <View style={styles.stepNumber}><Text style={styles.stepNumberText}>{i + 1}</Text></View>
+                    <Text style={styles.stepText}>{step}</Text>
+                  </View>
+                ))}
+                <Text style={styles.stepNote}>It's usually an inexpensive fix!</Text>
+              </View>
+            </>
+          )}
 
           {/* Feedback */}
           <View style={styles.feedbackRow}>
@@ -111,6 +163,13 @@ const styles = StyleSheet.create({
   stepNumberText: { fontSize: 12, fontWeight: '700', color: '#6DBE75' },
   stepText: { flex: 1, fontSize: 13, color: '#374151', lineHeight: 20 },
   stepNote: { fontSize: 12, color: '#9CA3AF', fontStyle: 'italic', marginTop: 4 },
+  heroCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF3E0', borderRadius: 24, padding: 16, marginBottom: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  heroText: { flex: 1 },
+  heroTitle: { fontSize: 20, fontWeight: '700', color: '#1F2937', marginBottom: 4 },
+  heroSub: { fontSize: 13, lineHeight: 20, color: '#6B7280' },
+  capturedPhoto: { width: '100%', height: 200, borderRadius: 20, marginBottom: 16 },
+  stepWarning: { backgroundColor: '#FEF3C7' },
+  stepSuccess: { backgroundColor: '#D1FAE5' },
   feedbackRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   feedbackBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FFFFFF', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
   feedbackText: { fontSize: 12, fontWeight: '600', color: '#6B7280' },

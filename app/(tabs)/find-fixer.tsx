@@ -31,7 +31,7 @@ export default function FindFixerScreen() {
           </View>
           <Image
             source={require('@/assets/images/fix.png')}
-            style={{ width: 120, height: 120 }}
+            style={{ width: 130, height: 130, marginRight: -10, marginBottom: -16 }}
             resizeMode="contain"
           />
         </View>

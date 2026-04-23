@@ -29,7 +29,7 @@ export default function HomeScreen() {
         <View style={styles.hero}>
           <Image
             source={require('@/assets/images/greetings.png')}
-            style={{ width: 110, height: 110 }}
+            style={{ width: 120, height: 120, marginLeft: -10, marginBottom: -16 }}
             resizeMode="contain"
           />
           <View style={styles.heroText}>
