@@ -33,7 +33,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not force parts loose too hard. Protect chrome surfaces with a cloth when using tools.',
     callProfessional: 'If the faucet body is cracked, badly corroded, or continues leaking after replacing parts.',
-    ifixitUrl: 'https://www.ifixit.com/Guide/How+To+Fix+A+Leaky+Faucet/39117',
+      ifixitUrl: 'https://www.ifixit.com/Guide/How+To+Fix+A+Leaky+Faucet/39117',
   },
   {
     id: 'low-water-pressure',
@@ -55,7 +55,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Turn off the faucet before removing the aerator. Be careful not to lose small filter parts.',
     callProfessional: 'If the whole house has low pressure and the issue is not from the main supply.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=low+water+pressure',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=low+water+pressure',
   },
   {
     id: 'clogged-sink',
@@ -79,7 +79,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid mixing different chemical cleaners. Wear gloves when handling trapped debris.',
     callProfessional: 'If the clog keeps returning or affects multiple drains.',
-    ifixitUrl: 'https://www.ifixit.com/Guide/How+to+Unclog+a+Drain/143479',
+      ifixitUrl: 'https://www.ifixit.com/Guide/How+to+Unclog+a+Drain/143479',
   },
   {
     id: 'slow-draining-shower',
@@ -102,7 +102,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Wear gloves. Be careful around sharp edges on the drain cover.',
     callProfessional: 'If water backs up badly or the clog seems deep in the pipe.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=slow+draining+shower',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=slow+draining+shower',
   },
   {
     id: 'running-toilet',
@@ -125,7 +125,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Set the tank lid down on a safe surface to avoid cracking it.',
     callProfessional: 'If parts are replaced but the toilet still runs or leaks from the base.',
-    ifixitUrl: 'https://www.ifixit.com/Guide/Toilet+Runs+Constantly/48321',
+      ifixitUrl: 'https://www.ifixit.com/Guide/Toilet+Runs+Constantly/48321',
   },
   {
     id: 'pipe-leak',
@@ -148,7 +148,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Temporary fixes are not long-term solutions. Keep electrical devices away from wet areas.',
     callProfessional: 'If the leak gets worse, the pipe is corroded, or the repair does not hold.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=pipe+leak+repair',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=pipe+leak+repair',
   },
   {
     id: 'squeaky-hinges',
@@ -168,7 +168,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not overapply lubricant on floors because it can get slippery.',
     callProfessional: 'If the hinge is bent, broken, or the door frame is damaged.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=squeaky+hinge',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=squeaky+hinge',
   },
   {
     id: 'door-wont-close',
@@ -190,7 +190,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Sand only a little at a time. Avoid forcing the door.',
     callProfessional: 'If the frame is warped or the door has major alignment issues.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=door+won%27t+close',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=door+won%27t+close',
   },
   {
     id: 'loose-doorknob',
@@ -211,7 +211,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Keep screws in one place so they do not get lost.',
     callProfessional: 'If the lock mechanism inside the door is damaged.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=loose+doorknob',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=loose+doorknob',
   },
   {
     id: 'stuck-window',
@@ -232,7 +232,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not force glass windows hard. This can crack the glass.',
     callProfessional: 'If the frame is warped or the glass feels unstable.',
-    ifixitUrl: 'https://www.ifixit.com/Search?query=stuck+window',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=stuck+window',
   },
   {
     id: 'broken-lock',
@@ -253,6 +253,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Use dry graphite lubricant instead of oily products for locks.',
     callProfessional: 'If it is a security door lock or if you are locked out.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=fix+broken+lock',
   },
   {
     id: 'small-wall-cracks',
@@ -272,6 +273,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Wear a mask when sanding fine dust.',
     callProfessional: 'If cracks keep growing or appear near structural areas.',
+       ifixitUrl: 'https://www.ifixit.com/Guide/How+to+Patch+a+Hole+in+Drywall/48320',
   },
   {
     id: 'peeling-paint',
@@ -292,6 +294,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Fix any water source first before repainting.',
     callProfessional: 'If paint keeps peeling due to hidden moisture or mold.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=peeling+paint+repair',
   },
   {
     id: 'hole-drywall',
@@ -313,6 +316,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not overfill the hole too much or it will be harder to sand smooth.',
     callProfessional: 'If the hole is large or there may be wires or pipes behind the wall.',
+    ifixitUrl: 'https://www.ifixit.com/Guide/How+to+Patch+a+Hole+in+Drywall/48320',
   },
   {
     id: 'mold-spots',
@@ -333,6 +337,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not handle large mold patches yourself. Avoid mixing bleach with other cleaners.',
     callProfessional: 'If mold covers a large area or keeps coming back.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=mold+removal+wall',
   },
   {
     id: 'light-not-working',
@@ -354,6 +359,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not touch exposed wires. Use dry hands.',
     callProfessional: 'If the fixture still does not work after changing the bulb and checking the breaker.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=fix+light+not+working',
   },
   {
     id: 'loose-outlet',
@@ -374,6 +380,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Never work on an outlet with power on.',
     callProfessional: 'If plugs spark, the outlet is warm, or wires look damaged.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=fix+loose+electrical+outlet',
   },
   {
     id: 'tripped-breaker',
@@ -394,6 +401,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Stand on a dry surface. Do not keep resetting a breaker repeatedly.',
     callProfessional: 'If the breaker trips again right away or smells burnt.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=circuit+breaker+tripping',
   },
   {
     id: 'bulb-flickering',
@@ -414,6 +422,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Never overtighten a bulb.',
     callProfessional: 'If multiple fixtures flicker or you notice burning smells.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=flickering+light+bulb',
   },
   // APPLIANCES
   {
@@ -436,6 +445,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Always unplug before opening any panel.',
     callProfessional: 'If the pump is not working or makes unusual noises.',
+       ifixitUrl: 'https://www.ifixit.com/Search?query=washer+not+draining',
   },
   {
     id: 'wm-not-spinning',
@@ -455,6 +465,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid overloading the machine.',
     callProfessional: 'If motor or belt issues are suspected.',
+       ifixitUrl: 'https://www.ifixit.com/Search?query=washer+not+spinning',
   },
   {
     id: 'wm-leaking',
@@ -474,6 +485,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Dry the area to prevent slipping.',
     callProfessional: 'If leak comes from inside the machine.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=washer+leaking+water',
   },
   {
     id: 'wm-making-noise',
@@ -492,6 +504,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not ignore loud grinding sounds.',
     callProfessional: 'If noise comes from motor or bearings.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=washer+making+noise',
   },
   {
     id: 'fridge-not-cooling',
@@ -511,6 +524,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Unplug before cleaning coils.',
     callProfessional: 'If compressor is not running.',
+       ifixitUrl: 'https://www.ifixit.com/Search?query=fridge+not+cooling',
   },
   {
     id: 'fridge-leaking',
@@ -528,6 +542,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid sharp tools when clearing drain.',
     callProfessional: 'If leak continues after cleaning.',
+       ifixitUrl: 'https://www.ifixit.com/Search?query=fridge+leaking+water',
   },
   {
     id: 'fridge-ice-buildup',
@@ -546,6 +561,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not chip ice with sharp tools.',
     callProfessional: 'If frost returns quickly.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=fridge+ice+buildup',
   },
   {
     id: 'fridge-smell',
@@ -563,6 +579,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Dispose spoiled food properly.',
     callProfessional: 'If smell persists without visible cause.',
+       ifixitUrl: 'https://www.ifixit.com/Search?query=fridge+bad+smell',
   },
   {
     id: 'ac-weak-airflow',
@@ -580,6 +597,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Clean filters regularly.',
     callProfessional: 'If fan motor is weak.',
+       ifixitUrl: 'https://www.ifixit.com/Search?query=ac+weak+airflow',
   },
   {
     id: 'ac-not-cooling',
@@ -597,6 +615,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid opening unit internals.',
     callProfessional: 'Possible refrigerant issue.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=air+conditioner+not+cooling',
   },
   {
     id: 'ac-dirty-filter',
@@ -614,6 +633,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Never install wet filter.',
     callProfessional: 'If airflow still weak after cleaning.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=ac+dirty+filter',
   },
   {
     id: 'ac-water-dripping',
@@ -631,6 +651,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid electrical contact with water.',
     callProfessional: 'If internal leak persists.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=ac+water+dripping',
   },
   {
     id: 'microwave-not-heating',
@@ -648,6 +669,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not open internal parts.',
     callProfessional: 'Magnetron issue suspected.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=microwave+not+heating',
   },
   {
     id: 'rice-cooker',
@@ -665,6 +687,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not use damaged cord.',
     callProfessional: 'Internal wiring issue.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=rice+cooker+repair',
   },
   {
     id: 'induction-pan',
@@ -682,6 +705,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Use flat-bottom cookware only.',
     callProfessional: 'If no cookware is detected at all.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=induction+cooktop+repair',
   },
   // CAR
   {
@@ -705,6 +729,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid touching both terminals at the same time.',
     callProfessional: 'If corrosion keeps coming back quickly.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=battery+corrosion+cleaning',
   },
   {
     id: 'dead-battery',
@@ -726,6 +751,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not connect cables incorrectly.',
     callProfessional: 'If the battery dies frequently.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=car+battery+dead',
   },
   {
     id: 'loose-terminals',
@@ -743,6 +769,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not overtighten.',
     callProfessional: 'If terminals are damaged or worn.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=loose+battery+terminals',
   },
   {
     id: 'flat-tire',
@@ -765,6 +792,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Never go under the car while using a jack.',
     callProfessional: 'If you do not have tools or it is unsafe.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=change+flat+tire',
   },
   {
     id: 'low-pressure',
@@ -783,6 +811,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not overinflate.',
     callProfessional: 'If tire loses air frequently.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=low+tire+pressure',
   },
   {
     id: 'uneven-wear',
@@ -800,6 +829,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Worn tires reduce safety.',
     callProfessional: 'If wear is severe.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=tire+uneven+wear',
   },
   {
     id: 'low-engine-oil',
@@ -819,6 +849,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Use correct oil type.',
     callProfessional: 'If oil level drops quickly.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=low+engine+oil',
   },
   {
     id: 'coolant-check',
@@ -836,6 +867,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Never open when engine is hot.',
     callProfessional: 'If coolant leaks.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=check+engine+coolant',
   },
   {
     id: 'brake-fluid',
@@ -853,6 +885,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid spilling fluid on paint.',
     callProfessional: 'If brakes feel soft or fluid is low.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=brake+fluid+check',
   },
   {
     id: 'car-wont-start',
@@ -871,6 +904,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not keep cranking engine repeatedly.',
     callProfessional: 'If issue persists.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=car+won%27t+start',
   },
   {
     id: 'jumpstart',
@@ -891,6 +925,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Follow correct cable order.',
     callProfessional: 'If unsure or battery is damaged.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=jumpstart+car',
   },
   {
     id: 'warning-lights',
@@ -908,6 +943,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not ignore red warning lights.',
     callProfessional: 'Immediately for critical warnings.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=car+warning+lights',
   },
   // ELECTRONICS
   {
@@ -928,6 +964,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not use metal objects to clean the port.',
     callProfessional: 'If port is loose or damaged.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=phone+won%27t+charge',
   },
   {
     id: 'phone-overheating',
@@ -947,6 +984,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not put phone in fridge or freezer.',
     callProfessional: 'If overheating happens frequently.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=phone+overheating',
   },
   {
     id: 'slow-performance',
@@ -966,6 +1004,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid installing unknown apps.',
     callProfessional: 'If phone is still very slow after cleanup.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=phone+slow+performance',
   },
   {
     id: 'laptop-overheating',
@@ -985,6 +1024,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not open internal parts unless experienced.',
     callProfessional: 'If fan is noisy or overheating persists.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=laptop+overheating',
   },
   {
     id: 'laptop-not-turning-on',
@@ -1003,6 +1043,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not force power button repeatedly.',
     callProfessional: 'If no signs of power at all.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=laptop+won%27t+turn+on',
   },
   {
     id: 'battery-draining',
@@ -1022,6 +1063,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid using non-original chargers.',
     callProfessional: 'If battery health is very low.',
+      ifixitUrl: 'https://www.ifixit.com/Search?query=phone+battery+draining+fast',
   },
   {
     id: 'no-internet',
@@ -1040,6 +1082,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid unplugging frequently.',
     callProfessional: 'If internet is down for long time.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=no+internet+connection',
   },
   {
     id: 'slow-connection',
@@ -1058,6 +1101,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid overheating router.',
     callProfessional: 'If speed is consistently slow.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=slow+internet+connection',
   },
   {
     id: 'router-reset',
@@ -1075,6 +1119,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Reset removes saved settings.',
     callProfessional: 'If reset does not fix issue.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=router+reset',
   },
   {
     id: 'broken-charger',
@@ -1092,6 +1137,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not use damaged chargers.',
     callProfessional: 'If device still does not charge.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=broken+charger+repair',
   },
   {
     id: 'extension-not-working',
@@ -1109,6 +1155,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid overloading extension.',
     callProfessional: 'If outlet itself is faulty.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=extension+cord+not+working',
   },
   {
     id: 'loose-plug',
@@ -1126,6 +1173,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Loose outlets can be dangerous.',
     callProfessional: 'If sparks or heat are present.',
+        ifixitUrl: 'https://www.ifixit.com/Search?query=loose+electrical+plug',
   },
 ];
 

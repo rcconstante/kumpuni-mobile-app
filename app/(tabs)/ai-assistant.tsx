@@ -1,1 +1,1 @@
-export { default } from './ai-assistant/AIAssistantScreen';
+export { default } from '@/lib/ai-assistant/AIAssistantScreen';

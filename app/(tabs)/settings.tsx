@@ -61,6 +61,41 @@ export default function SettingsScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>Settings</Text>
 
+        {/* Preferences */}
+        <Text style={styles.sectionLabel}>Preferences</Text>
+        <View style={styles.menu}>
+          <View style={styles.menuItem}>
+            <Globe size={20} color="#1F2937" strokeWidth={2} />
+            <Text style={styles.menuLabel}>Language</Text>
+            <Text style={styles.menuValue}>English</Text>
+          </View>
+          <View style={styles.menuItem}>
+            <Moon size={20} color="#1F2937" strokeWidth={2} />
+            <Text style={styles.menuLabel}>Dark Mode</Text>
+            <Switch
+              value={darkMode}
+              onValueChange={setDarkMode}
+              thumbColor={darkMode ? '#6DBE75' : '#f4f3f4'}
+              trackColor={{ false: '#D1D5DB', true: '#A7F3D0' }}
+            />
+          </View>
+        </View>
+
+        {/* Contact Support */}
+        <Text style={styles.sectionLabel}>Contact Support</Text>
+        <TouchableOpacity
+          style={styles.menuItem}
+          activeOpacity={0.7}
+          onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Kumpuni%20Support`)}
+        >
+          <Mail size={20} color="#1F2937" strokeWidth={2} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.menuLabel}>Email Support</Text>
+            <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{SUPPORT_EMAIL}</Text>
+          </View>
+          <ChevronRight size={18} color="#9CA3AF" />
+        </TouchableOpacity>
+
         {/* Developers */}
         <Text style={styles.sectionLabel}>Developers</Text>
         <View style={styles.devList}>
@@ -81,46 +116,11 @@ export default function SettingsScreen() {
           ))}
         </View>
 
-        {/* Contact Support */}
-        <Text style={styles.sectionLabel}>Contact Support</Text>
-        <TouchableOpacity
-          style={styles.menuItem}
-          activeOpacity={0.7}
-          onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Kumpuni%20Support`)}
-        >
-          <Mail size={20} color="#1F2937" strokeWidth={2} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.menuLabel}>Email Support</Text>
-            <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{SUPPORT_EMAIL}</Text>
-          </View>
-          <ChevronRight size={18} color="#9CA3AF" />
-        </TouchableOpacity>
-
         {/* Rate */}
         <TouchableOpacity style={styles.rateBtn} activeOpacity={0.8}>
           <Star size={20} color="#F59E0B" fill="#F59E0B" strokeWidth={0} />
           <Text style={styles.rateText}>Rate 5 Stars</Text>
         </TouchableOpacity>
-
-        {/* Preferences */}
-        <Text style={styles.sectionLabel}>Preferences</Text>
-        <View style={styles.menu}>
-          <View style={styles.menuItem}>
-            <Globe size={20} color="#1F2937" strokeWidth={2} />
-            <Text style={styles.menuLabel}>Language</Text>
-            <Text style={styles.menuValue}>English</Text>
-          </View>
-          <View style={styles.menuItem}>
-            <Moon size={20} color="#1F2937" strokeWidth={2} />
-            <Text style={styles.menuLabel}>Dark Mode</Text>
-            <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
-              thumbColor={darkMode ? '#6DBE75' : '#f4f3f4'}
-              trackColor={{ false: '#D1D5DB', true: '#A7F3D0' }}
-            />
-          </View>
-        </View>
 
         {/* Links */}
         <View style={styles.menu}>

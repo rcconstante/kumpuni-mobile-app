@@ -78,30 +78,30 @@ export const GUIDE_CATEGORIES: Category[] = [
         id: 'washing-machine',
         title: 'Washing Machine',
         items: [
-          { id: 'not-draining', title: 'Not draining' },
-          { id: 'not-spinning', title: 'Not spinning' },
-          { id: 'leaking-water', title: 'Leaking water' },
-          { id: 'making-noise', title: 'Making noise' },
+          { id: 'wm-not-draining', title: 'Not draining' },
+          { id: 'wm-not-spinning', title: 'Not spinning' },
+          { id: 'wm-leaking', title: 'Leaking water' },
+          { id: 'wm-making-noise', title: 'Making noise' },
         ],
       },
       {
         id: 'refrigerator',
         title: 'Refrigerator',
         items: [
-          { id: 'not-cooling', title: 'Not cooling' },
-          { id: 'water-leaking', title: 'Water leaking' },
-          { id: 'ice-buildup', title: 'Ice buildup' },
-          { id: 'strange-smell', title: 'Strange smell' },
+          { id: 'fridge-not-cooling', title: 'Not cooling' },
+          { id: 'fridge-leaking', title: 'Water leaking' },
+          { id: 'fridge-ice-buildup', title: 'Ice buildup' },
+          { id: 'fridge-smell', title: 'Strange smell' },
         ],
       },
       {
         id: 'air-conditioner',
         title: 'Air Conditioner',
         items: [
-          { id: 'weak-airflow', title: 'Weak airflow' },
+          { id: 'ac-weak-airflow', title: 'Weak airflow' },
           { id: 'ac-not-cooling', title: 'Not cooling' },
-          { id: 'dirty-filter', title: 'Dirty filter' },
-          { id: 'water-dripping', title: 'Water dripping' },
+          { id: 'ac-dirty-filter', title: 'Dirty filter' },
+          { id: 'ac-water-dripping', title: 'Water dripping' },
         ],
       },
       {
@@ -124,7 +124,7 @@ export const GUIDE_CATEGORIES: Category[] = [
         id: 'battery',
         title: 'Battery',
         items: [
-          { id: 'corrosion-cleaning', title: 'Corrosion cleaning' },
+          { id: 'battery-corrosion', title: 'Corrosion cleaning' },
           { id: 'dead-battery', title: 'Dead battery' },
           { id: 'loose-terminals', title: 'Loose terminals' },
         ],
@@ -167,7 +167,7 @@ export const GUIDE_CATEGORIES: Category[] = [
         id: 'phone',
         title: 'Phone',
         items: [
-          { id: 'not-charging', title: 'Not charging' },
+          { id: 'phone-not-charging', title: 'Not charging' },
           { id: 'phone-overheating', title: 'Overheating' },
           { id: 'slow-performance', title: 'Slow performance' },
         ],
@@ -177,7 +177,7 @@ export const GUIDE_CATEGORIES: Category[] = [
         title: 'Laptop',
         items: [
           { id: 'laptop-overheating', title: 'Overheating' },
-          { id: 'not-turning-on', title: 'Not turning on' },
+          { id: 'laptop-not-turning-on', title: 'Not turning on' },
           { id: 'battery-draining', title: 'Battery draining fast' },
         ],
       },

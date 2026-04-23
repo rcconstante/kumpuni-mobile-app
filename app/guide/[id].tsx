@@ -14,10 +14,11 @@ import { WebView } from 'react-native-webview';
 import { findGuideContent } from '@/data/guideContent';
 
 export default function GuideDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const router = useRouter();
   const [mode, setMode] = useState<'local' | 'external'>('local');
-  const guide = useMemo(() => findGuideContent(id), [id]);
+  const guideId = useMemo(() => (Array.isArray(id) ? id[0] : id), [id]);
+  const guide = useMemo(() => findGuideContent(guideId ?? ''), [guideId]);
 
   if (!guide) {
     return (
