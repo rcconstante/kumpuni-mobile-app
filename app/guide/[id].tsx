@@ -1,18 +1,23 @@
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench, Globe, BookOpen } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { WebView } from 'react-native-webview';
 import { findGuideContent } from '@/data/guideContent';
 
 export default function GuideDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const guide = findGuideContent(id);
+  const router = useRouter();
+  const [mode, setMode] = useState<'local' | 'external'>('local');
+  const guide = useMemo(() => findGuideContent(id), [id]);
 
   if (!guide) {
     return (
@@ -39,13 +44,45 @@ export default function GuideDetailScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Overview */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Overview</Text>
-          <Text style={styles.bodyText}>{guide.overview}</Text>
+      {/* Source toggle */}
+      {guide?.ifixitUrl && (
+        <View style={styles.toggleRow}>
+          <TouchableOpacity
+            onPress={() => setMode('local')}
+            style={[styles.toggleBtn, mode === 'local' && styles.toggleActive]}
+            activeOpacity={0.8}>
+            <BookOpen size={14} color={mode === 'local' ? '#FFFFFF' : '#374151'} />
+            <Text style={[styles.toggleText, mode === 'local' && styles.toggleTextActive]}>Local Guide</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setMode('external')}
+            style={[styles.toggleBtn, mode === 'external' && styles.toggleActive]}
+            activeOpacity={0.8}>
+            <Globe size={14} color={mode === 'external' ? '#FFFFFF' : '#374151'} />
+            <Text style={[styles.toggleText, mode === 'external' && styles.toggleTextActive]}>External Guide</Text>
+          </TouchableOpacity>
         </View>
+      )}
 
+      {mode === 'external' && guide?.ifixitUrl ? (
+        <WebView
+          style={{ flex: 1 }}
+          source={{ uri: guide.ifixitUrl }}
+          startInLoadingState
+          renderLoading={() => (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F7F7F5' }}>
+              <ActivityIndicator size="large" color="#6DBE75" />
+              <Text style={{ marginTop: 12, fontSize: 13, color: '#6B7280' }}>Loading iFixit guide…</Text>
+            </View>
+          )}
+        />
+      ) : (
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          {/* Overview */}
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>Overview</Text>
+            <Text style={styles.bodyText}>{guide.overview}</Text>
+          </View>
         {/* Tools */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
@@ -115,24 +152,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
   },
-  title: { fontSize: 18, fontWeight: '700', color: '#1F2937', flex: 1, textAlign: 'center', marginHorizontal: 8 },
-  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
+  title: { fontSize: 16, fontWeight: '700', color: '#1F2937', flex: 1, textAlign: 'center' },
+  scroll: { padding: 16, gap: 16, paddingBottom: 40 },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 14,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowRadius: 2,
     elevation: 1,
   },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#1F2937' },
   bodyText: { fontSize: 13, color: '#6B7280', lineHeight: 20 },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
@@ -157,6 +190,34 @@ const styles = StyleSheet.create({
   stepNumberText: { fontSize: 12, fontWeight: '700', color: '#6DBE75' },
   stepText: { flex: 1, fontSize: 13, color: '#374151', lineHeight: 20 },
   warningCard: { backgroundColor: '#FFFBEB' },
+  toggleRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  toggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  toggleActive: {
+    backgroundColor: '#6DBE75',
+  },
+  toggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  toggleTextActive: {
+    color: '#FFFFFF',
+  },
   warningTitle: { color: '#B45309' },
   empty: {
     textAlign: 'center',

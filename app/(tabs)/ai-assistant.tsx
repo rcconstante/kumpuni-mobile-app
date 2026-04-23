@@ -4,7 +4,7 @@ import {
   KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Mic, Send, FileText, ArrowRight, Sparkles, Zap, Wrench, Home, Cpu, Car } from 'lucide-react-native';
+import { Mic, Send, FileText, ArrowRight, Sparkles, Zap, Wrench, Home, Cpu, Car, RotateCcw } from 'lucide-react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { findBestGuides, ScoredGuide, getSuggestedCategories } from '@/data/guideContent';
 
@@ -271,14 +271,17 @@ function detectIntent(query: string): { intent: Intent; detail?: string } {
   }
 
   // Greetings
-  const greetingWords = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings', 'what\'s up', 'sup', 'yo', 'howdy', 'hiya'];
-  if (greetingWords.some((g) => q.includes(g)) || /^hi+|^hello|^hey/.test(q)) {
-    return { intent: 'greeting' };
-  }
+  const greetingWords = ['good morning', 'good afternoon', 'good evening', 'greetings', 'what\'s up', 'howdy'];
+  if (greetingWords.some((g) => q.includes(g))) return { intent: 'greeting' };
+  // standalone greeting words (must be word-boundary matched)
+  const standaloneGreetings = ['hi', 'hello', 'hey', 'sup', 'yo', 'hiya'];
+  const wordsOnly = q.split(/[^a-z]+/).filter(Boolean);
+  if (standaloneGreetings.some((g) => wordsOnly.includes(g))) return { intent: 'greeting' };
 
-  // Thanks
-  const thanksWords = ['thank', 'thanks', 'appreciate', 'grateful', 'cheers', 'ty', 'thx', 'nice', 'awesome', 'cool', 'great'];
-  if (thanksWords.some((t) => words.includes(t) || q.includes(t))) {
+  // Thanks (exact word match only — prevents "cooling" matching "cool")
+  const thanksWords = ['thank', 'thanks', 'appreciate', 'grateful', 'cheers', 'ty', 'thx', 'nice', 'awesome', 'great'];
+  const cleanWords = q.replace(/[^\w\s]/g, '').split(/\s+/).filter((w) => w.length > 1);
+  if (thanksWords.some((t) => cleanWords.includes(t))) {
     return { intent: 'thanks' };
   }
 
@@ -311,9 +314,11 @@ function detectIntent(query: string): { intent: Intent; detail?: string } {
   }
 
   // --- Repair-specific intents ---
-  // Symptom describe
+  // Symptom describe — only if user is purely describing, NOT asking for help
+  const repairRequestIndicators = ['fix', 'repair', 'help', 'how', 'my', 'broken', 'not working', 'won\'t', 'doesn\'t', 'issue', 'problem', 'what should', 'what do', 'can i', 'how to', 'need', 'want'];
+  const hasRepairRequest = repairRequestIndicators.some((r) => q.includes(r));
   const symptomWords = ['makes noise', 'making noise', 'smells', 'smelling', 'sound', 'noise', 'leaking', 'dripping', 'buzzing', 'flickering', 'hot', 'warm', 'cold', 'wet'];
-  if (symptomWords.some((s) => q.includes(s))) {
+  if (!hasRepairRequest && symptomWords.some((s) => q.includes(s))) {
     return { intent: 'symptom_describe' };
   }
 
@@ -969,6 +974,15 @@ export default function AIAssistantScreen() {
     runExpertQuery(text);
   };
 
+  const handleReset = () => {
+    setMessages([]);
+    setTypingIds(new Set());
+    setLastTopic(null);
+    setLastCategory(null);
+    setInput('');
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
   const handleChip = (text: string) => {
     const userMsg: Message = { id: uid('user-'), role: 'user', text };
     setMessages((prev) => [...prev, userMsg]);
@@ -1001,6 +1015,9 @@ export default function AIAssistantScreen() {
               <Text style={styles.heroTitle}>AI Assistant</Text>
               <Text style={styles.heroSub}>Describe your problem and I'll find the right guide for you.</Text>
             </View>
+            <TouchableOpacity onPress={handleReset} style={styles.resetBtn} activeOpacity={0.7}>
+              <RotateCcw size={18} color="#6DBE75" strokeWidth={2} />
+            </TouchableOpacity>
           </View>
 
           {/* Messages */}
@@ -1241,6 +1258,16 @@ const styles = StyleSheet.create({
   heroSub: { fontSize: 12, lineHeight: 18, color: '#6B7280' },
 
   capturedPhoto: { width: '100%', height: 180, borderRadius: 16, marginTop: 6, marginBottom: 6 },
+
+  resetBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F0FDF4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
 
   /* Compact result cards */
   resultCard: {

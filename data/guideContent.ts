@@ -8,6 +8,7 @@ export interface GuideContent {
   steps: string[];
   safetyNotes: string;
   callProfessional: string;
+  ifixitUrl?: string;
 }
 
 export const GUIDE_CONTENTS: GuideContent[] = [
@@ -32,6 +33,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not force parts loose too hard. Protect chrome surfaces with a cloth when using tools.',
     callProfessional: 'If the faucet body is cracked, badly corroded, or continues leaking after replacing parts.',
+    ifixitUrl: 'https://www.ifixit.com/Guide/How+To+Fix+A+Leaky+Faucet/39117',
   },
   {
     id: 'low-water-pressure',
@@ -53,6 +55,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Turn off the faucet before removing the aerator. Be careful not to lose small filter parts.',
     callProfessional: 'If the whole house has low pressure and the issue is not from the main supply.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=low+water+pressure',
   },
   {
     id: 'clogged-sink',
@@ -76,6 +79,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Avoid mixing different chemical cleaners. Wear gloves when handling trapped debris.',
     callProfessional: 'If the clog keeps returning or affects multiple drains.',
+    ifixitUrl: 'https://www.ifixit.com/Guide/How+to+Unclog+a+Drain/143479',
   },
   {
     id: 'slow-draining-shower',
@@ -98,6 +102,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Wear gloves. Be careful around sharp edges on the drain cover.',
     callProfessional: 'If water backs up badly or the clog seems deep in the pipe.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=slow+draining+shower',
   },
   {
     id: 'running-toilet',
@@ -120,6 +125,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Set the tank lid down on a safe surface to avoid cracking it.',
     callProfessional: 'If parts are replaced but the toilet still runs or leaks from the base.',
+    ifixitUrl: 'https://www.ifixit.com/Guide/Toilet+Runs+Constantly/48321',
   },
   {
     id: 'pipe-leak',
@@ -142,6 +148,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Temporary fixes are not long-term solutions. Keep electrical devices away from wet areas.',
     callProfessional: 'If the leak gets worse, the pipe is corroded, or the repair does not hold.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=pipe+leak+repair',
   },
   {
     id: 'squeaky-hinges',
@@ -161,6 +168,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not overapply lubricant on floors because it can get slippery.',
     callProfessional: 'If the hinge is bent, broken, or the door frame is damaged.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=squeaky+hinge',
   },
   {
     id: 'door-wont-close',
@@ -182,6 +190,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Sand only a little at a time. Avoid forcing the door.',
     callProfessional: 'If the frame is warped or the door has major alignment issues.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=door+won%27t+close',
   },
   {
     id: 'loose-doorknob',
@@ -202,6 +211,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Keep screws in one place so they do not get lost.',
     callProfessional: 'If the lock mechanism inside the door is damaged.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=loose+doorknob',
   },
   {
     id: 'stuck-window',
@@ -222,6 +232,7 @@ export const GUIDE_CONTENTS: GuideContent[] = [
     ],
     safetyNotes: 'Do not force glass windows hard. This can crack the glass.',
     callProfessional: 'If the frame is warped or the glass feels unstable.',
+    ifixitUrl: 'https://www.ifixit.com/Search?query=stuck+window',
   },
   {
     id: 'broken-lock',
