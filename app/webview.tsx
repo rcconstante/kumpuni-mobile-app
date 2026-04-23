@@ -3,15 +3,52 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Globe } from 'lucide-react-native';
 import { WebView } from 'react-native-webview';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const WEBVIEW_ALLOWED_URL_REGEX = /^(https?:\/\/|about:blank|data:)/i;
+const YOUTUBE_DEEP_LINK_REGEX = /^(vnd\.youtube:\/\/|youtube:\/\/)/i;
+const YOUTUBE_VIDEO_ID_QUERY_REGEX = /[?&]v=([A-Za-z0-9_-]{11})/;
+
+function normalizeYoutubeDeepLinkUrl(url: string): string | undefined {
+  const decoded = decodeURIComponent(url ?? '');
+  if (!YOUTUBE_DEEP_LINK_REGEX.test(decoded)) return undefined;
+
+  const idMatch = decoded.match(YOUTUBE_VIDEO_ID_QUERY_REGEX);
+  if (idMatch?.[1]) {
+    return `https://www.youtube.com/watch?v=${idMatch[1]}`;
+  }
+
+  const withoutScheme = decoded
+    .replace(/^vnd\.youtube:\/\//i, '')
+    .replace(/^youtube:\/\//i, '');
+
+  if (!withoutScheme) return undefined;
+  return `https://${withoutScheme}`;
+}
 
 export default function WebViewScreen() {
   const { url, title } = useLocalSearchParams<{ url: string; title: string }>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
   const decodedUrl = decodeURIComponent(url || '');
   const decodedTitle = decodeURIComponent(title || 'Web View');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState(decodedUrl);
+
+  useEffect(() => {
+    setCurrentUrl(decodedUrl);
+    setLoading(true);
+    setError(false);
+  }, [decodedUrl]);
+
+  const handleShouldStartLoad = (urlToLoad: string): boolean => {
+    const rewrittenUrl = normalizeYoutubeDeepLinkUrl(urlToLoad);
+    if (rewrittenUrl) {
+      setCurrentUrl(rewrittenUrl);
+      return false;
+    }
+
+    return WEBVIEW_ALLOWED_URL_REGEX.test(urlToLoad);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -26,7 +63,7 @@ export default function WebViewScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      {decodedUrl ? (
+      {currentUrl ? (
         <>
           {loading && (
             <View style={styles.loader}>
@@ -41,8 +78,9 @@ export default function WebViewScreen() {
             </View>
           ) : (
             <WebView
-              source={{ uri: decodedUrl }}
+              source={{ uri: currentUrl }}
               style={{ flex: 1 }}
+              onShouldStartLoadWithRequest={(request) => handleShouldStartLoad(request.url)}
               onLoadStart={() => setLoading(true)}
               onLoadEnd={() => setLoading(false)}
               onError={() => {

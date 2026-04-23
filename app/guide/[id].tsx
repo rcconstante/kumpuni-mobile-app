@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench, Globe, BookOpen, PlayCircle } from 'lucide-react-native';
@@ -19,40 +20,93 @@ import {
   getYoutubeEmbedUrlFromVideoId,
 } from '@/data/guideContent';
 
+const WEBVIEW_ALLOWED_URL_REGEX = /^(https?:\/\/|about:blank|data:)/i;
+const YOUTUBE_QUERY_VIDEO_ID_REGEX = /[?&]v=([A-Za-z0-9_-]{11})/;
+const YOUTUBE_PATH_VIDEO_ID_REGEX = /\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/;
+
+function extractVideoIdFromUrl(rawUrl: string): string | undefined {
+  const queryMatch = rawUrl.match(YOUTUBE_QUERY_VIDEO_ID_REGEX);
+  if (queryMatch?.[1]) return queryMatch[1];
+
+  const pathMatch = rawUrl.match(YOUTUBE_PATH_VIDEO_ID_REGEX);
+  if (pathMatch?.[1]) return pathMatch[1];
+
+  return undefined;
+}
+
 export default function GuideDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const router = useRouter();
   const [mode, setMode] = useState<'local' | 'external'>('local');
   const [videoHasError, setVideoHasError] = useState(false);
   const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState<string | undefined>(undefined);
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | undefined>(undefined);
+  const [thumbnailHasError, setThumbnailHasError] = useState(false);
   const [isResolvingVideo, setIsResolvingVideo] = useState(false);
   const guideId = useMemo(() => (Array.isArray(id) ? id[0] : id), [id]);
   const guide = useMemo(() => findGuideContent(guideId ?? ''), [guideId]);
   const configuredYoutubeEmbedUrl = useMemo(() => (guide ? getGuideYoutubeEmbedUrl(guide) : undefined), [guide]);
   const youtubeSearchUrl = useMemo(() => (guide ? getGuideYoutubeSearchUrl(guide) : ''), [guide]);
+  const youtubeThumbnailUrl = useMemo(
+    () => (youtubeVideoId ? `https://i.ytimg.com/vi/${youtubeVideoId}/hqdefault.jpg` : undefined),
+    [youtubeVideoId]
+  );
+  const youtubeOpenUrl = useMemo(
+    () => (youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : youtubeSearchUrl),
+    [youtubeVideoId, youtubeSearchUrl]
+  );
+
+  const handleVideoShouldStartLoad = (url: string): boolean => {
+    const decodedUrl = decodeURIComponent(url ?? '');
+
+    if (decodedUrl.startsWith('vnd.youtube://') || decodedUrl.startsWith('youtube://')) {
+      const deepLinkedVideoId = extractVideoIdFromUrl(decodedUrl);
+      if (deepLinkedVideoId) {
+        setYoutubeEmbedUrl(getYoutubeEmbedUrlFromVideoId(deepLinkedVideoId));
+        setYoutubeVideoId(deepLinkedVideoId);
+        setThumbnailHasError(false);
+        setVideoHasError(false);
+      }
+      return false;
+    }
+
+    return WEBVIEW_ALLOWED_URL_REGEX.test(decodedUrl);
+  };
+
+  const openYoutubeTutorial = () => {
+    const tutorialTitle = guide?.title ? `${guide.title} Tutorial` : 'Guide Tutorial';
+    router.push(
+      `/webview?url=${encodeURIComponent(youtubeOpenUrl)}&title=${encodeURIComponent(tutorialTitle)}`
+    );
+  };
 
   useEffect(() => {
     let cancelled = false;
     setVideoHasError(false);
+    setThumbnailHasError(false);
 
     if (!guide) {
       setYoutubeEmbedUrl(undefined);
+      setYoutubeVideoId(undefined);
       setIsResolvingVideo(false);
       return;
     }
 
     if (configuredYoutubeEmbedUrl) {
       setYoutubeEmbedUrl(configuredYoutubeEmbedUrl);
+      setYoutubeVideoId(extractVideoIdFromUrl(configuredYoutubeEmbedUrl));
       setIsResolvingVideo(false);
       return;
     }
 
     setYoutubeEmbedUrl(undefined);
+    setYoutubeVideoId(undefined);
     setIsResolvingVideo(true);
 
     getGuideFirstYoutubeVideoId(guide)
       .then((videoId) => {
         if (cancelled) return;
+        setYoutubeVideoId(videoId);
         setYoutubeEmbedUrl(videoId ? getYoutubeEmbedUrlFromVideoId(videoId) : undefined);
       })
       .finally(() => {
@@ -155,26 +209,25 @@ export default function GuideDetailScreen() {
                   domStorageEnabled
                   mediaPlaybackRequiresUserAction={false}
                   setSupportMultipleWindows={false}
+                  onShouldStartLoadWithRequest={(request) => handleVideoShouldStartLoad(request.url)}
                   onError={() => setVideoHasError(true)}
                   onHttpError={() => setVideoHasError(true)}
                 />
               ) : (
-                <View style={styles.videoFallbackWrap}>
-                  <Text style={styles.videoFallbackTitle}>Video unavailable in-app</Text>
-                  <Text style={styles.videoFallbackText}>
-                    Some YouTube videos cannot be embedded due to provider restrictions.
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.videoFallbackBtn}
-                    activeOpacity={0.85}
-                    onPress={() =>
-                      router.push(
-                        `/webview?url=${encodeURIComponent(youtubeSearchUrl)}&title=${encodeURIComponent(`${guide.title} Tutorial`)}`
-                      )
-                    }>
-                    <Text style={styles.videoFallbackBtnText}>Open on YouTube</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={styles.videoFallbackWrap} activeOpacity={0.9} onPress={openYoutubeTutorial}>
+                  {youtubeThumbnailUrl && !thumbnailHasError ? (
+                    <Image
+                      source={{ uri: youtubeThumbnailUrl }}
+                      style={styles.videoFallbackThumbnail}
+                      resizeMode="cover"
+                      onError={() => setThumbnailHasError(true)}
+                    />
+                  ) : null}
+                  <View style={styles.videoFallbackOverlay} />
+                  <View style={styles.videoPreviewPlayBadge}>
+                    <PlayCircle size={52} color="#FFFFFF" strokeWidth={1.8} />
+                  </View>
+                </TouchableOpacity>
               )}
             </View>
           </View>
@@ -290,31 +343,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     backgroundColor: '#111827',
+    position: 'relative',
+    overflow: 'hidden',
   },
-  videoFallbackTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#F9FAFB',
-    textAlign: 'center',
-    marginBottom: 6,
+  videoFallbackThumbnail: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
-  videoFallbackText: {
-    fontSize: 12,
-    color: '#D1D5DB',
-    textAlign: 'center',
-    lineHeight: 18,
+  videoFallbackOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.72)',
   },
-  videoFallbackBtn: {
-    marginTop: 12,
-    backgroundColor: '#6DBE75',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  videoFallbackBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  videoPreviewPlayBadge: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: 74,
+    height: 74,
+    marginLeft: -37,
+    marginTop: -37,
+    borderRadius: 37,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(17, 24, 39, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    zIndex: 1,
   },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   badge: {
