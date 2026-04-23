@@ -11,21 +11,60 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench, Globe, BookOpen, PlayCircle } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { WebView } from 'react-native-webview';
-import { findGuideContent, getGuideYoutubeEmbedUrl, getGuideYoutubeSearchUrl } from '@/data/guideContent';
+import {
+  findGuideContent,
+  getGuideFirstYoutubeVideoId,
+  getGuideYoutubeEmbedUrl,
+  getGuideYoutubeSearchUrl,
+  getYoutubeEmbedUrlFromVideoId,
+} from '@/data/guideContent';
 
 export default function GuideDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const router = useRouter();
   const [mode, setMode] = useState<'local' | 'external'>('local');
   const [videoHasError, setVideoHasError] = useState(false);
+  const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState<string | undefined>(undefined);
+  const [isResolvingVideo, setIsResolvingVideo] = useState(false);
   const guideId = useMemo(() => (Array.isArray(id) ? id[0] : id), [id]);
   const guide = useMemo(() => findGuideContent(guideId ?? ''), [guideId]);
-  const youtubeEmbedUrl = useMemo(() => (guide ? getGuideYoutubeEmbedUrl(guide) : ''), [guide]);
+  const configuredYoutubeEmbedUrl = useMemo(() => (guide ? getGuideYoutubeEmbedUrl(guide) : undefined), [guide]);
   const youtubeSearchUrl = useMemo(() => (guide ? getGuideYoutubeSearchUrl(guide) : ''), [guide]);
 
   useEffect(() => {
+    let cancelled = false;
     setVideoHasError(false);
-  }, [guideId]);
+
+    if (!guide) {
+      setYoutubeEmbedUrl(undefined);
+      setIsResolvingVideo(false);
+      return;
+    }
+
+    if (configuredYoutubeEmbedUrl) {
+      setYoutubeEmbedUrl(configuredYoutubeEmbedUrl);
+      setIsResolvingVideo(false);
+      return;
+    }
+
+    setYoutubeEmbedUrl(undefined);
+    setIsResolvingVideo(true);
+
+    getGuideFirstYoutubeVideoId(guide)
+      .then((videoId) => {
+        if (cancelled) return;
+        setYoutubeEmbedUrl(videoId ? getYoutubeEmbedUrlFromVideoId(videoId) : undefined);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsResolvingVideo(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [guide, guideId, configuredYoutubeEmbedUrl]);
 
   if (!guide) {
     return (
@@ -99,8 +138,14 @@ export default function GuideDetailScreen() {
               <Text style={styles.sectionTitle}>YouTube Tutorial</Text>
             </View>
             <View style={styles.videoFrame}>
-              {youtubeEmbedUrl && !videoHasError ? (
+              {isResolvingVideo ? (
+                <View style={styles.videoLoadingWrap}>
+                  <ActivityIndicator size="small" color="#E5E7EB" />
+                  <Text style={styles.videoLoadingText}>Finding top YouTube tutorial...</Text>
+                </View>
+              ) : youtubeEmbedUrl && !videoHasError ? (
                 <WebView
+                  key={youtubeEmbedUrl}
                   source={{ uri: youtubeEmbedUrl }}
                   style={styles.videoWebView}
                   originWhitelist={["*"]}
@@ -228,6 +273,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   videoWebView: { flex: 1, backgroundColor: '#000000' },
+  videoLoadingWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#111827',
+  },
+  videoLoadingText: {
+    fontSize: 12,
+    color: '#D1D5DB',
+  },
   videoFallbackWrap: {
     flex: 1,
     alignItems: 'center',

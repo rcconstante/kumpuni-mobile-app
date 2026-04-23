@@ -1230,15 +1230,62 @@ export function getGuideYoutubeEmbedUrl(guide: GuideContent): string | undefined
 
   const videoId = configured ? extractYouTubeVideoId(configured) : undefined;
   if (videoId) {
-    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+    return getYoutubeEmbedUrlFromVideoId(videoId);
   }
 
   return undefined;
 }
 
+export function getYoutubeEmbedUrlFromVideoId(videoId: string): string {
+  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+}
+
 export function getGuideYoutubeSearchUrl(guide: GuideContent): string {
   const query = encodeURIComponent(`${guide.title} repair tutorial`);
   return `https://www.youtube.com/results?search_query=${query}`;
+}
+
+export async function getGuideFirstYoutubeVideoId(guide: GuideContent): Promise<string | undefined> {
+  const searchUrl = getGuideYoutubeSearchUrl(guide);
+
+  try {
+    const response = await fetch(searchUrl, {
+      headers: { Accept: 'text/html' },
+    });
+
+    if (response.ok) {
+      const html = await response.text();
+
+      const firstVideoRendererMatch = html.match(
+        /"videoRenderer"\s*:\s*\{"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"/
+      );
+      if (firstVideoRendererMatch?.[1]) {
+        return firstVideoRendererMatch[1];
+      }
+
+      const fallbackVideoIdMatch = html.match(/"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"/);
+      if (fallbackVideoIdMatch?.[1]) {
+        return fallbackVideoIdMatch[1];
+      }
+    }
+  } catch {
+    // Fallback below if the HTML search response cannot be parsed.
+  }
+
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(
+    `${guide.title} repair tutorial`
+  )}`;
+
+  try {
+    const response = await fetch(feedUrl);
+    if (!response.ok) return undefined;
+
+    const xml = await response.text();
+    const feedVideoIdMatch = xml.match(/<yt:videoId>([A-Za-z0-9_-]{11})<\/yt:videoId>/);
+    return feedVideoIdMatch?.[1];
+  } catch {
+    return undefined;
+  }
 }
 
 export function findGuideContent(id: string): GuideContent | undefined {
