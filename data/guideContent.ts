@@ -9,6 +9,7 @@ export interface GuideContent {
   safetyNotes: string;
   callProfessional: string;
   ifixitUrl?: string;
+  youtubeUrl?: string;
 }
 
 export const GUIDE_CONTENTS: GuideContent[] = [
@@ -1176,6 +1177,66 @@ export const GUIDE_CONTENTS: GuideContent[] = [
   ifixitUrl: 'https://www.thespruce.com/how-to-fix-loose-outlets-6827194',
 }
 ];
+
+const YOUTUBE_VIDEO_ID_REGEX = /^[A-Za-z0-9_-]{11}$/;
+
+function extractYouTubeVideoId(urlOrId: string): string | undefined {
+  const value = urlOrId.trim();
+  if (!value) return undefined;
+
+  if (YOUTUBE_VIDEO_ID_REGEX.test(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+
+    if (host === 'youtu.be') {
+      const candidate = parsed.pathname.split('/').filter(Boolean)[0];
+      return candidate && YOUTUBE_VIDEO_ID_REGEX.test(candidate) ? candidate : undefined;
+    }
+
+    if (host.endsWith('youtube.com')) {
+      const fromQuery = parsed.searchParams.get('v');
+      if (fromQuery && YOUTUBE_VIDEO_ID_REGEX.test(fromQuery)) {
+        return fromQuery;
+      }
+
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      const embedIndex = parts.indexOf('embed');
+      if (embedIndex >= 0 && parts[embedIndex + 1] && YOUTUBE_VIDEO_ID_REGEX.test(parts[embedIndex + 1])) {
+        return parts[embedIndex + 1];
+      }
+
+      const shortsIndex = parts.indexOf('shorts');
+      if (shortsIndex >= 0 && parts[shortsIndex + 1] && YOUTUBE_VIDEO_ID_REGEX.test(parts[shortsIndex + 1])) {
+        return parts[shortsIndex + 1];
+      }
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+export function getGuideYoutubeEmbedUrl(guide: GuideContent): string {
+  const configured = guide.youtubeUrl?.trim();
+
+  if (configured?.includes('youtube.com/embed')) {
+    return configured;
+  }
+
+  const videoId = configured ? extractYouTubeVideoId(configured) : undefined;
+  if (videoId) {
+    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+  }
+
+  const query = encodeURIComponent(`${guide.title} repair tutorial`);
+  return `https://www.youtube.com/embed?listType=search&list=${query}`;
+}
+
 export function findGuideContent(id: string): GuideContent | undefined {
   return GUIDE_CONTENTS.find((g) => g.id === id);
 }

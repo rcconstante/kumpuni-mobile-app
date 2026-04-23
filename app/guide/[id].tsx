@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench, Globe, BookOpen } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench, Globe, BookOpen, PlayCircle } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { WebView } from 'react-native-webview';
-import { findGuideContent } from '@/data/guideContent';
+import { findGuideContent, getGuideYoutubeEmbedUrl } from '@/data/guideContent';
 
 export default function GuideDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
@@ -19,6 +19,7 @@ export default function GuideDetailScreen() {
   const [mode, setMode] = useState<'local' | 'external'>('local');
   const guideId = useMemo(() => (Array.isArray(id) ? id[0] : id), [id]);
   const guide = useMemo(() => findGuideContent(guideId ?? ''), [guideId]);
+  const youtubeEmbedUrl = useMemo(() => (guide ? getGuideYoutubeEmbedUrl(guide) : ''), [guide]);
 
   if (!guide) {
     return (
@@ -84,6 +85,26 @@ export default function GuideDetailScreen() {
             <Text style={styles.sectionTitle}>Overview</Text>
             <Text style={styles.bodyText}>{guide.overview}</Text>
           </View>
+
+          {/* YouTube tutorial */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <PlayCircle size={18} color="#6DBE75" strokeWidth={2} />
+              <Text style={styles.sectionTitle}>YouTube Tutorial</Text>
+            </View>
+            <View style={styles.videoFrame}>
+              <WebView
+                source={{ uri: youtubeEmbedUrl }}
+                style={styles.videoWebView}
+                allowsFullscreenVideo
+                javaScriptEnabled
+                domStorageEnabled
+                mediaPlaybackRequiresUserAction
+                setSupportMultipleWindows={false}
+              />
+            </View>
+          </View>
+
         {/* Tools */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
@@ -170,6 +191,14 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#1F2937' },
   bodyText: { fontSize: 13, color: '#6B7280', lineHeight: 20 },
+  videoFrame: {
+    marginTop: 4,
+    height: 220,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#000000',
+  },
+  videoWebView: { flex: 1, backgroundColor: '#000000' },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   badge: {
     backgroundColor: '#E8F5E9',
