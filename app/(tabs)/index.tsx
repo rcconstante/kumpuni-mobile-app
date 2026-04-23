@@ -19,10 +19,17 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.appName}>Kumpuni</Text>
-            <Text style={styles.tagline}>The DIY Home Maintenance Guide</Text>
-            <Text style={styles.dateText}>April 23, 2026</Text>
+          <View style={styles.brandWrap}>
+            <Image
+              source={require('@/assets/images/logo.png')}
+              style={styles.logo}
+              resizeMode="cover"
+            />
+            <View>
+              <Text style={styles.appName}>Kumpuni</Text>
+              <Text style={styles.tagline}>The DIY Home Maintenance Guide</Text>
+              <Text style={styles.dateText}>April 23, 2026</Text>
+            </View>
           </View>
           <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7}>
             <Bell size={20} color="#1F2937" strokeWidth={2} />
@@ -93,6 +100,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F7F5' },
   scroll: { paddingHorizontal: 20, paddingBottom: 100 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 8, marginBottom: 24 },
+  brandWrap: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  logo: { width: 48, height: 48, borderRadius: 16 },
   appName: { fontSize: 22, fontWeight: '800', color: '#1F2937' },
   tagline: { fontSize: 12, fontWeight: '500', color: '#9CA3AF', marginTop: 2 },
   bellBtn: { width: 40, height: 40, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
