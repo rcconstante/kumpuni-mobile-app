@@ -1,15 +1,19 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Bell, ChevronRight, CheckCircle2, Wind, Droplets, PaintBucket, Lightbulb, FileText } from 'lucide-react-native';
+import { Bell, ChevronRight, Home, Wrench, Car, Cpu, FileText } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { GUIDE_CATEGORIES } from '@/data/guides';
 
-const GUIDES = [
-  { id: '1', title: 'Air Conditioner', subtitle: 'Filter changed 2 months ago', icon: Wind, bg: '#E3F2FD', check: true },
-  { id: '2', title: 'Faucet', subtitle: 'Last checked 3 weeks ago', icon: Droplets, bg: '#E8F5E9', check: true },
-  { id: '3', title: 'Bedroom Paint', subtitle: 'Color code #E7F1FA', icon: PaintBucket, bg: '#FFF8E1', check: false },
-  { id: '4', title: 'Lighting', subtitle: 'All good - Checked recently', icon: Lightbulb, bg: '#F3E5F5', check: true },
-];
+const ICON_MAP: Record<string, typeof Home> = {
+  home: Home,
+  appliances: Wrench,
+  car: Car,
+  electronics: Cpu,
+};
 
 export default function HomeScreen() {
+  const featured = GUIDE_CATEGORIES.slice(0, 4);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -40,21 +44,30 @@ export default function HomeScreen() {
 
         {/* Guides */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Your Guides</Text>
-          <TouchableOpacity activeOpacity={0.7}><Text style={styles.viewAll}>View all</Text></TouchableOpacity>
+          <Text style={styles.sectionTitle}>Categories</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/guides' as any)}>
+            <Text style={styles.viewAll}>View all</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.guidesGrid}>
-          {GUIDES.map((g) => {
-            const Icon = g.icon;
+          {featured.map((cat) => {
+            const Icon = ICON_MAP[cat.id] || Home;
+            const count = cat.subCategories.reduce((s, sub) => s + sub.items.length, 0);
             return (
-              <TouchableOpacity key={g.id} style={[styles.guideCard, { backgroundColor: g.bg }]} activeOpacity={0.8}>
+              <TouchableOpacity
+                key={cat.id}
+                style={[styles.guideCard, { backgroundColor: cat.color }]}
+                activeOpacity={0.8}
+                onPress={() => router.push(`/guides/${cat.id}` as any)}
+              >
                 <View style={styles.guideTop}>
-                  <View style={styles.iconWrap}><Icon size={24} color="#1F2937" strokeWidth={1.8} /></View>
-                  {g.check && <CheckCircle2 size={16} color="#6DBE75" strokeWidth={2.5} />}
+                  <View style={styles.iconWrap}>
+                    <Icon size={24} color="#1F2937" strokeWidth={1.8} />
+                  </View>
                 </View>
-                <Text style={styles.guideTitle}>{g.title}</Text>
-                <Text style={styles.guideSub}>{g.subtitle}</Text>
+                <Text style={styles.guideTitle}>{cat.title}</Text>
+                <Text style={styles.guideSub}>{count} guides</Text>
               </TouchableOpacity>
             );
           })}

@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Home, MessageCircle, Plus, Settings, ShieldCheck } from 'lucide-react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Home, MessageCircle, Settings, ShieldCheck } from 'lucide-react-native';
 
 function TabItem({
   focused,
@@ -20,20 +20,6 @@ function TabItem({
       />
       <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>{label}</Text>
     </View>
-  );
-}
-
-function CenterTabButton(props: any) {
-  return (
-    <TouchableOpacity
-      {...props}
-      activeOpacity={0.8}
-      style={[props.style, styles.centerButtonWrapper]}
-    >
-      <View style={styles.centerButton}>
-        <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
-      </View>
-    </TouchableOpacity>
   );
 }
 
@@ -60,12 +46,6 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <TabItem focused={focused} icon={MessageCircle} label="AI" />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="post-job"
-        options={{
-          tabBarButton: (props) => <CenterTabButton {...props} />,
         }}
       />
       <Tabs.Screen
@@ -139,24 +119,5 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: '#FFFFFF',
-  },
-  centerButtonWrapper: {
-    marginTop: -20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 64,
-  },
-  centerButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#6DBE75',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#6DBE75',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
   },
 });

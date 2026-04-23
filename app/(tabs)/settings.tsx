@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import {
   HelpCircle,
   FileText,
@@ -13,11 +14,18 @@ import {
   ExternalLink,
 } from 'lucide-react-native';
 
+const BASE_URL = 'https://kumpuni.netlify.app';
+
 const LINKS = [
   { id: '1', label: 'Help & Support', icon: HelpCircle },
-  { id: '2', label: 'Legal', icon: FileText },
-  { id: '3', label: 'Privacy', icon: Shield },
+  { id: '2', label: 'Legal', icon: FileText, url: `${BASE_URL}/terms` },
+  { id: '3', label: 'Privacy', icon: Shield, url: `${BASE_URL}/privacy` },
 ];
+
+function openWebView(label: string, url?: string) {
+  if (!url) return;
+  router.push(`/webview?url=${encodeURIComponent(url)}&title=${encodeURIComponent(label)}` as any);
+}
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(false);
@@ -32,7 +40,12 @@ export default function SettingsScreen() {
           {LINKS.map((m) => {
             const Icon = m.icon;
             return (
-              <TouchableOpacity key={m.id} style={styles.menuItem} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={m.id}
+                style={styles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => openWebView(m.label, m.url)}
+              >
                 <Icon size={20} color="#1F2937" strokeWidth={2} />
                 <Text style={styles.menuLabel}>{m.label}</Text>
                 <ChevronRight size={18} color="#9CA3AF" />

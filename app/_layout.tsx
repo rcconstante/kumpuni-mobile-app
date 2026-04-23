@@ -10,6 +10,10 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="webview" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="guides" />
+        <Stack.Screen name="guide/[id]" />
+        <Stack.Screen name="guides/[category]" />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="dark" />

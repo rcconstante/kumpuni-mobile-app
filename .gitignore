@@ -22,8 +22,11 @@ axoscribe
 npm-debug.*
 yarn-debug.*
 yarn-error.*
-
+intent.node_modules
+Category.md
+database.md
 # macos
+intent.md
 .DS_Store
 *.pem
 
