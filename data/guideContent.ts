@@ -1221,7 +1221,7 @@ function extractYouTubeVideoId(urlOrId: string): string | undefined {
   return undefined;
 }
 
-export function getGuideYoutubeEmbedUrl(guide: GuideContent): string {
+export function getGuideYoutubeEmbedUrl(guide: GuideContent): string | undefined {
   const configured = guide.youtubeUrl?.trim();
 
   if (configured?.includes('youtube.com/embed')) {
@@ -1233,8 +1233,12 @@ export function getGuideYoutubeEmbedUrl(guide: GuideContent): string {
     return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
   }
 
+  return undefined;
+}
+
+export function getGuideYoutubeSearchUrl(guide: GuideContent): string {
   const query = encodeURIComponent(`${guide.title} repair tutorial`);
-  return `https://www.youtube.com/embed?listType=search&list=${query}`;
+  return `https://www.youtube.com/results?search_query=${query}`;
 }
 
 export function findGuideContent(id: string): GuideContent | undefined {

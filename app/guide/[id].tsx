@@ -9,17 +9,23 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, CheckCircle2, AlertTriangle, Wrench, Globe, BookOpen, PlayCircle } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { WebView } from 'react-native-webview';
-import { findGuideContent, getGuideYoutubeEmbedUrl } from '@/data/guideContent';
+import { findGuideContent, getGuideYoutubeEmbedUrl, getGuideYoutubeSearchUrl } from '@/data/guideContent';
 
 export default function GuideDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
   const router = useRouter();
   const [mode, setMode] = useState<'local' | 'external'>('local');
+  const [videoHasError, setVideoHasError] = useState(false);
   const guideId = useMemo(() => (Array.isArray(id) ? id[0] : id), [id]);
   const guide = useMemo(() => findGuideContent(guideId ?? ''), [guideId]);
   const youtubeEmbedUrl = useMemo(() => (guide ? getGuideYoutubeEmbedUrl(guide) : ''), [guide]);
+  const youtubeSearchUrl = useMemo(() => (guide ? getGuideYoutubeSearchUrl(guide) : ''), [guide]);
+
+  useEffect(() => {
+    setVideoHasError(false);
+  }, [guideId]);
 
   if (!guide) {
     return (
@@ -93,19 +99,42 @@ export default function GuideDetailScreen() {
               <Text style={styles.sectionTitle}>YouTube Tutorial</Text>
             </View>
             <View style={styles.videoFrame}>
-              <WebView
-                source={{ uri: youtubeEmbedUrl }}
-                style={styles.videoWebView}
-                allowsFullscreenVideo
-                javaScriptEnabled
-                domStorageEnabled
-                mediaPlaybackRequiresUserAction
-                setSupportMultipleWindows={false}
-              />
+              {youtubeEmbedUrl && !videoHasError ? (
+                <WebView
+                  source={{ uri: youtubeEmbedUrl }}
+                  style={styles.videoWebView}
+                  originWhitelist={["*"]}
+                  allowsFullscreenVideo
+                  allowsInlineMediaPlayback
+                  javaScriptEnabled
+                  domStorageEnabled
+                  mediaPlaybackRequiresUserAction={false}
+                  setSupportMultipleWindows={false}
+                  onError={() => setVideoHasError(true)}
+                  onHttpError={() => setVideoHasError(true)}
+                />
+              ) : (
+                <View style={styles.videoFallbackWrap}>
+                  <Text style={styles.videoFallbackTitle}>Video unavailable in-app</Text>
+                  <Text style={styles.videoFallbackText}>
+                    Some YouTube videos cannot be embedded due to provider restrictions.
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.videoFallbackBtn}
+                    activeOpacity={0.85}
+                    onPress={() =>
+                      router.push(
+                        `/webview?url=${encodeURIComponent(youtubeSearchUrl)}&title=${encodeURIComponent(`${guide.title} Tutorial`)}`
+                      )
+                    }>
+                    <Text style={styles.videoFallbackBtnText}>Open on YouTube</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
 
-        {/* Tools */}
+          {/* Tools */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Wrench size={18} color="#6DBE75" strokeWidth={2} />
@@ -199,6 +228,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   videoWebView: { flex: 1, backgroundColor: '#000000' },
+  videoFallbackWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    backgroundColor: '#111827',
+  },
+  videoFallbackTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#F9FAFB',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  videoFallbackText: {
+    fontSize: 12,
+    color: '#D1D5DB',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  videoFallbackBtn: {
+    marginTop: 12,
+    backgroundColor: '#6DBE75',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  videoFallbackBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   badge: {
     backgroundColor: '#E8F5E9',
