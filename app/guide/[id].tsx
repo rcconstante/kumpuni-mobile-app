@@ -129,6 +129,7 @@ export default function GuideDetailScreen() {
           <Text style={styles.bodyText}>{guide.callProfessional}</Text>
         </View>
       </ScrollView>
+    )}
     </SafeAreaView>
   );
 }
