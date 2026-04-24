@@ -13,13 +13,6 @@ const ICON_MAP: Record<string, typeof Home> = {
 
 const TODAY = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-const ICON_MAP: Record<string, typeof Home> = {
-  home: Home,
-  appliances: Wrench,
-  car: Car,
-  electronics: Cpu,
-};
-
 export default function HomeScreen() {
   const featured = GUIDE_CATEGORIES.slice(0, 4);
 
