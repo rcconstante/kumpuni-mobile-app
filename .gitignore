@@ -1,6 +1,6 @@
 # dependencies
 node_modules/
-
+kumpuni-web
 # expo
 .expo/
 dist/

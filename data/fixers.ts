@@ -428,7 +428,7 @@ export async function submitBusinessApplication(
     lng,
     logo_url: normalizeImageUrl(logoUrl) ?? null,
     image_url: normalizeImageUrl(imageUrl) ?? null,
-    images: additionalImages.length > 0 ? additionalImages : null,
+    images: additionalImages.length > 0 ? additionalImages : [],
     payment_proof_path: paymentProofPath,
     payment_reference: paymentReference,
     status: 'pending' as BusinessApplicationStatus,
@@ -439,10 +439,7 @@ export async function submitBusinessApplication(
   };
 
   const { data, error } = await supabase
-    .from('businesses')
-    .insert(row)
-    .select(SELECT_COLS)
-    .single();
+    .rpc('insert_business_application', { p_data: row });
 
   if (error) {
     throw new Error(`Could not submit application: ${error.message}`);
