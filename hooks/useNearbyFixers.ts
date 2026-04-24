@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
-import { FixerBusiness, getPublishedFixers } from '@/data/fixers';
+import { useEffect, useMemo, useState } from 'react';
+import { FixerBusiness, FixerCategory, getPublishedFixers } from '@/data/fixers';
+import { supabase } from '@/lib/supabase';
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371; // Earth radius in km
@@ -21,41 +22,63 @@ export function useNearbyFixers(
   userLat: number,
   userLng: number,
   radiusKm: number,
-  category: string,
+  category: FixerCategory | string,
   sort: SortMode
 ): FixerBusiness[] {
+  const [all, setAll] = useState<FixerBusiness[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const data = await getPublishedFixers();
+      if (!cancelled) setAll(data);
+    };
+    load();
+
+    const channel = supabase
+      .channel('public:businesses:mobile')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'businesses' },
+        () => {
+          load();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return useMemo(() => {
-    let filtered = getPublishedFixers().filter((f) => {
+    let filtered = all.filter((f) => {
       const dist = haversineDistance(userLat, userLng, f.lat, f.lng);
       if (dist > radiusKm) return false;
       if (category !== 'All' && f.category !== category) return false;
       return true;
     });
 
-    // Compute distance and attach
-    filtered = filtered.map((f) => ({
-      ...f,
-      _distance: haversineDistance(userLat, userLng, f.lat, f.lng),
-    })) as any;
-
     if (sort === 'nearest') {
-      filtered.sort((a, b) => (a as any)._distance - (b as any)._distance);
+      filtered = [...filtered].sort(
+        (a, b) =>
+          haversineDistance(userLat, userLng, a.lat, a.lng) -
+          haversineDistance(userLat, userLng, b.lat, b.lng)
+      );
     } else if (sort === 'rating') {
-      filtered.sort((a, b) => b.rating - a.rating);
+      filtered = [...filtered].sort((a, b) => b.rating - a.rating);
     } else if (sort === 'reviews') {
-      filtered.sort((a, b) => b.reviews - a.reviews);
+      filtered = [...filtered].sort((a, b) => b.reviews - a.reviews);
     }
 
     return filtered;
-  }, [userLat, userLng, radiusKm, category, sort]);
+  }, [all, userLat, userLng, radiusKm, category, sort]);
 }
 
 export function formatDistance(km: number): string {
-  if (km < 1) {
-    return `${(km * 1000).toFixed(0)} m`;
-  }
-  if (km < 10) {
-    return `${km.toFixed(1)} km`;
-  }
+  if (km < 1) return `${(km * 1000).toFixed(0)} m`;
+  if (km < 10) return `${km.toFixed(1)} km`;
   return `${Math.round(km)} km`;
 }
+

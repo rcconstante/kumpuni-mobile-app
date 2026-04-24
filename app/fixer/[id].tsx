@@ -1,13 +1,48 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Image } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Star, MapPin, Phone, Mail, Globe, Clock, Crown } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getFixerById } from '@/data/fixers';
+import { FixerBusiness, getFixerById } from '@/data/fixers';
+import { safeHttpUrl, safeImageUrl } from '@/lib/safeUrl';
 
 export default function FixerDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
-  const fixer = getFixerById(Array.isArray(id) ? id[0] : id ?? '');
+  const fixerId = Array.isArray(id) ? id[0] : id ?? '';
+  const [fixer, setFixer] = useState<FixerBusiness | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getFixerById(fixerId).then((data) => {
+      if (!cancelled) {
+        setFixer(data ?? null);
+        setLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fixerId]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backBtn} activeOpacity={0.7} onPress={() => router.back()}>
+            <ArrowLeft size={22} color="#1F2937" strokeWidth={2} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Fixer</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator color="#6DBE75" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!fixer) {
     return (
@@ -39,15 +74,17 @@ export default function FixerDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Hero */}
         <View style={styles.hero}>
-          {fixer.logoUrl ? (
-            <Image source={{ uri: fixer.logoUrl }} style={styles.heroImage} resizeMode="contain" />
-          ) : fixer.images?.[0] ? (
-            <Image source={{ uri: fixer.images[0] }} style={styles.heroImage} resizeMode="cover" />
-          ) : (
-            <View style={[styles.heroAvatar, { backgroundColor: stringToColor(fixer.category) }]}>
-              <Text style={styles.heroAvatarText}>{fixer.name[0]}</Text>
-            </View>
-          )}
+          {(() => {
+            const safeLogo = safeImageUrl(fixer.logoUrl);
+            const safeFirstImage = safeImageUrl(fixer.images?.[0]);
+            if (safeLogo) return <Image source={{ uri: safeLogo }} style={styles.heroImage} resizeMode="contain" />;
+            if (safeFirstImage) return <Image source={{ uri: safeFirstImage }} style={styles.heroImage} resizeMode="cover" />;
+            return (
+              <View style={[styles.heroAvatar, { backgroundColor: stringToColor(fixer.category) }]}>
+                <Text style={styles.heroAvatarText}>{fixer.name[0]}</Text>
+              </View>
+            );
+          })()}
           <View style={styles.heroInfo}>
             <View style={styles.titleRow}>
               <Text style={styles.heroName}>{fixer.name}</Text>
@@ -71,9 +108,11 @@ export default function FixerDetailScreen() {
           <>
             <Text style={styles.sectionTitle}>Photos</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
-              {fixer.images.map((img, idx) => (
-                <Image key={idx} source={{ uri: img }} style={styles.bizImage} resizeMode="cover" />
-              ))}
+              {fixer.images.map((img, idx) => {
+                const safe = safeImageUrl(img);
+                if (!safe) return null;
+                return <Image key={idx} source={{ uri: safe }} style={styles.bizImage} resizeMode="cover" />;
+              })}
             </ScrollView>
           </>
         )}
@@ -108,17 +147,26 @@ export default function FixerDetailScreen() {
           <ActionBtn
             icon={Phone}
             label="Call"
-            onPress={() => Linking.openURL(`tel:${fixer.phone}`)}
+            onPress={() => {
+              const phone = (fixer.phone || '').replace(/[^+\d]/g, '').slice(0, 20);
+              if (phone) Linking.openURL(`tel:${phone}`);
+            }}
           />
           <ActionBtn
             icon={Mail}
             label="Email"
-            onPress={() => Linking.openURL(`mailto:${fixer.email}`)}
+            onPress={() => {
+              const email = (fixer.email || '').trim();
+              if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) Linking.openURL(`mailto:${email}`);
+            }}
           />
           <ActionBtn
             icon={Globe}
             label="Open in Maps"
-            onPress={() => Linking.openURL(fixer.googleMapsUrl)}
+            onPress={() => {
+              const safe = safeHttpUrl(fixer.googleMapsUrl);
+              if (safe) Linking.openURL(safe);
+            }}
           />
         </View>
       </ScrollView>

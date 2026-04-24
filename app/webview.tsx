@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Globe } from 'lucide-react-native';
 import { WebView } from 'react-native-webview';
 import { useEffect, useState } from 'react';
+import { safeHttpUrl } from '@/lib/safeUrl';
 
-const WEBVIEW_ALLOWED_URL_REGEX = /^(https?:\/\/|about:blank|data:)/i;
 const YOUTUBE_DEEP_LINK_REGEX = /^(vnd\.youtube:\/\/|youtube:\/\/)/i;
 const YOUTUBE_VIDEO_ID_QUERY_REGEX = /[?&]v=([A-Za-z0-9_-]{11})/;
 
@@ -28,26 +28,30 @@ function normalizeYoutubeDeepLinkUrl(url: string): string | undefined {
 
 export default function WebViewScreen() {
   const { url, title } = useLocalSearchParams<{ url: string; title: string }>();
-  const decodedUrl = decodeURIComponent(url || '');
-  const decodedTitle = decodeURIComponent(title || 'Web View');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  // Validate entry URL — only https allowed; YouTube deep links are rewritten
+  // to https by onShouldStartLoadWithRequest before the WebView ever loads them.
+  const decodedUrl = safeHttpUrl(decodeURIComponent(url || ''));
+  const decodedTitle = decodeURIComponent(title || 'Web View').slice(0, 120);
   const [currentUrl, setCurrentUrl] = useState(decodedUrl);
 
   useEffect(() => {
-    setCurrentUrl(decodedUrl);
+    setCurrentUrl(safeHttpUrl(decodeURIComponent(url || '')));
     setLoading(true);
     setError(false);
-  }, [decodedUrl]);
+  }, [url]);
 
   const handleShouldStartLoad = (urlToLoad: string): boolean => {
-    const rewrittenUrl = normalizeYoutubeDeepLinkUrl(urlToLoad);
-    if (rewrittenUrl) {
-      setCurrentUrl(rewrittenUrl);
+    // Rewrite YouTube deep links to https before allowing.
+    const rewritten = normalizeYoutubeDeepLinkUrl(urlToLoad);
+    if (rewritten) {
+      setCurrentUrl(rewritten);
       return false;
     }
-
-    return WEBVIEW_ALLOWED_URL_REGEX.test(urlToLoad);
+    // Block everything that isn't https.
+    return !!safeHttpUrl(urlToLoad);
   };
 
   return (
@@ -78,8 +82,14 @@ export default function WebViewScreen() {
             </View>
           ) : (
             <WebView
-              source={{ uri: currentUrl }}
+              source={{ uri: currentUrl! }}
               style={{ flex: 1 }}
+              originWhitelist={['https://*']}
+              javaScriptEnabled
+              setSupportMultipleWindows={false}
+              allowFileAccess={false}
+              allowFileAccessFromFileURLs={false}
+              allowUniversalAccessFromFileURLs={false}
               onShouldStartLoadWithRequest={(request) => handleShouldStartLoad(request.url)}
               onLoadStart={() => setLoading(true)}
               onLoadEnd={() => setLoading(false)}
@@ -92,7 +102,8 @@ export default function WebViewScreen() {
         </>
       ) : (
         <View style={styles.error}>
-          <Text style={styles.errorText}>No URL provided.</Text>
+          <Text style={styles.errorText}>Invalid or unsupported URL.</Text>
+          <Text style={styles.errorSub}>Only https links are allowed.</Text>
         </View>
       )}
     </SafeAreaView>

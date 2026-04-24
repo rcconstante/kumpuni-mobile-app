@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, ChevronDown, CreditCard, CheckCircle2 } from 'lucide-react-native';
+import { ArrowLeft, ChevronDown, QrCode, CheckCircle2, Upload } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -42,23 +42,22 @@ export default function ApplyBusinessScreen() {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   // Payment state
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
+  const [paymentProof, setPaymentProof] = useState<string | null>(null);
+  const [paymentReference, setPaymentReference] = useState('');
   const [processing, setProcessing] = useState(false);
 
   const canNext = () => {
     if (step === 0) return name && address && city && country && phone && email && googleMapsUrl.trim();
-    if (step === 1) return cardNumber.length >= 16 && expiry.length >= 5 && cvc.length >= 3;
+    if (step === 1) return !!paymentProof;
     return true;
   };
 
-  const pickBusinessImage = async (kind: 'logo' | 'highlight') => {
+  const pickBusinessImage = async (kind: 'logo' | 'highlight' | 'proof') => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert(
         'Permission needed',
-        'Please allow photo library access to upload your business logo or highlight picture.'
+        'Please allow photo library access to upload your image.'
       );
       return;
     }
@@ -72,39 +71,55 @@ export default function ApplyBusinessScreen() {
 
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
+      // Hard size cap (~5 MB after base64 ≈ 6.7 MB string). Reject early.
+      if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+        Alert.alert('Image too large', 'Please choose an image under 5 MB.');
+        return;
+      }
       const imageSource =
         asset.base64 && asset.mimeType
           ? `data:${asset.mimeType};base64,${asset.base64}`
           : asset.uri;
 
-      if (kind === 'logo') {
-        setBusinessLogo(imageSource);
-      } else {
-        setHighlightImage(imageSource);
-      }
+      if (kind === 'logo') setBusinessLogo(imageSource);
+      else if (kind === 'highlight') setHighlightImage(imageSource);
+      else setPaymentProof(imageSource);
     }
   };
 
   const handleNext = () => {
     if (step === 1) {
+      if (!paymentProof) {
+        Alert.alert('Payment proof required', 'Please upload a screenshot of your payment.');
+        return;
+      }
       setProcessing(true);
-      setTimeout(() => {
-        submitBusinessApplication({
-          name,
-          category,
-          address,
-          city,
-          country,
-          phone,
-          email,
-          description,
-          logoUrl: businessLogo || undefined,
-          imageUrl: highlightImage || undefined,
-          googleMapsUrl,
+      submitBusinessApplication({
+        name,
+        category,
+        address,
+        city,
+        country,
+        phone,
+        email,
+        description,
+        logoUrl: businessLogo || undefined,
+        imageUrl: highlightImage || undefined,
+        googleMapsUrl,
+        paymentProof,
+        paymentReference,
+      })
+        .then(() => {
+          setProcessing(false);
+          setStep(2);
+        })
+        .catch((err) => {
+          setProcessing(false);
+          Alert.alert(
+            'Submission failed',
+            err?.message ?? 'Could not submit your application. Please try again.'
+          );
         });
-        setProcessing(false);
-        setStep(2);
-      }, 1500);
     } else {
       setStep(step + 1);
     }
@@ -315,61 +330,72 @@ export default function ApplyBusinessScreen() {
           {step === 1 && (
             <>
               <View style={styles.paymentHeader}>
-                <CreditCard size={32} color="#6DBE75" />
-                <Text style={styles.paymentTitle}>Mock Payment</Text>
+                <QrCode size={32} color="#6DBE75" />
+                <Text style={styles.paymentTitle}>Scan to Pay</Text>
                 <Text style={styles.paymentSub}>
-                  This is a demo checkout. No real charge will be made.
+                  Use your bank or e-wallet app to scan the QR code below, then upload
+                  the screenshot of your payment confirmation.
                 </Text>
               </View>
 
-              <Text style={styles.label}>Card Number</Text>
+              <View style={styles.qrCard}>
+                <Image
+                  source={require('@/assets/images/qr.png')}
+                  style={styles.qrImage}
+                  resizeMode="contain"
+                />
+                <Text style={styles.qrCaption}>Kumpuni Business Listing • ₱999</Text>
+              </View>
+
+              <Text style={styles.label}>Reference Number / Sender Name</Text>
               <TextInput
                 style={styles.input}
-                placeholder="0000 0000 0000 0000"
-                value={cardNumber}
-                onChangeText={(t) => setCardNumber(t.replace(/\D/g, '').slice(0, 16))}
-                keyboardType="number-pad"
+                placeholder="e.g. GCash ref 1234567890"
+                value={paymentReference}
+                onChangeText={(t) => setPaymentReference(t.slice(0, 120))}
+                autoCapitalize="none"
                 placeholderTextColor="#9CA3AF"
               />
+              <Text style={styles.helperText}>
+                Helps us match your payment if the screenshot is unclear.
+              </Text>
 
-              <View style={styles.row}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>Expiry</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="MM/YY"
-                    value={expiry}
-                    onChangeText={setExpiry}
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-                <View style={{ width: 16 }} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>CVC</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="123"
-                    value={cvc}
-                    onChangeText={(t) => setCvc(t.replace(/\D/g, '').slice(0, 4))}
-                    keyboardType="number-pad"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
+              <Text style={styles.label}>Payment Proof Screenshot *</Text>
+              <TouchableOpacity
+                style={styles.uploadBtn}
+                activeOpacity={0.8}
+                onPress={() => pickBusinessImage('proof')}
+              >
+                <Upload size={16} color="#374151" />
+                <Text style={styles.uploadBtnText}>
+                  {paymentProof ? 'Change Payment Screenshot' : 'Upload Payment Screenshot'}
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.helperText}>
+                Upload a clear screenshot showing the amount, date and reference number.
+                Max 5 MB. Stored privately and only visible to Kumpuni admins.
+              </Text>
+              {paymentProof && (
+                <Image
+                  source={{ uri: paymentProof }}
+                  style={styles.uploadPreview}
+                  resizeMode="cover"
+                />
+              )}
 
               <View style={styles.summaryCard}>
                 <Text style={styles.summaryTitle}>Plan Summary</Text>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Business Listing</Text>
-                  <Text style={styles.summaryValue}>$19.99 / month</Text>
+                  <Text style={styles.summaryValue}>₱999 / month</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Highlight Badge</Text>
                   <Text style={styles.summaryValue}>Included</Text>
                 </View>
                 <View style={[styles.summaryRow, styles.summaryTotal]}>
-                  <Text style={styles.summaryLabelTotal}>Total (mock)</Text>
-                  <Text style={styles.summaryValueTotal}>$19.99</Text>
+                  <Text style={styles.summaryLabelTotal}>Total</Text>
+                  <Text style={styles.summaryValueTotal}>₱999</Text>
                 </View>
               </View>
             </>
@@ -406,7 +432,7 @@ export default function ApplyBusinessScreen() {
             onPress={handleNext}
           >
             <Text style={styles.nextBtnText}>
-              {processing ? 'Processing...' : step === 1 ? 'Pay $19.99 (Mock)' : 'Continue'}
+              {processing ? 'Processing...' : step === 1 ? 'Submit Application' : 'Continue'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -461,6 +487,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     marginTop: 2,
@@ -507,7 +536,18 @@ const styles = StyleSheet.create({
   pickerItemText: { fontSize: 14, color: '#1F2937' },
   paymentHeader: { alignItems: 'center', marginVertical: 20, gap: 8 },
   paymentTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937' },
-  paymentSub: { fontSize: 12, color: '#6B7280', textAlign: 'center' },
+  paymentSub: { fontSize: 12, color: '#6B7280', textAlign: 'center', paddingHorizontal: 12, lineHeight: 18 },
+  qrCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  qrImage: { width: 220, height: 220 },
+  qrCaption: { marginTop: 12, fontSize: 13, fontWeight: '700', color: '#1F2937' },
   row: { flexDirection: 'row' },
   summaryCard: { backgroundColor: '#FFFFFF', borderRadius: 20, padding: 16, marginTop: 20 },
   summaryTitle: { fontSize: 14, fontWeight: '700', color: '#1F2937', marginBottom: 12 },
