@@ -3,22 +3,82 @@
     "name": "Kumpuni",
     "slug": "kumpuni",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
-    "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
+    "scheme": "kumpuni",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.kumpuni.app",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "requireFullScreen": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Kumpuni uses your location to show nearby fixers and service providers in your area.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Kumpuni uses your location to show nearby fixers and service providers in your area.",
+        "NSPhotoLibraryUsageDescription": "Kumpuni needs access to your photo library so you can upload business highlight photos and payment proof screenshots.",
+        "NSPhotoLibraryAddUsageDescription": "Kumpuni saves images to your photo library.",
+        "NSCameraUsageDescription": "Kumpuni uses the camera so you can take photos of payment proofs and business highlight images.",
+        "NSMicrophoneUsageDescription": "Microphone access is not used by Kumpuni.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        }
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "associatedDomains": []
+    },
+    "android": {
+      "package": "com.kumpuni.app",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/images/logo.png"
     },
-    "plugins": ["expo-router", "expo-font", "expo-web-browser"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Kumpuni uses your location to show nearby fixers and service providers in your area."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kumpuni needs access to your photo library so you can upload business highlight photos and payment proof screenshots.",
+          "cameraPermission": "Kumpuni uses the camera so you can take photos of payment proofs and business highlight images."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }
+

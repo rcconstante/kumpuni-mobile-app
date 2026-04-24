@@ -11,6 +11,15 @@ const ICON_MAP: Record<string, typeof Home> = {
   electronics: Cpu,
 };
 
+const TODAY = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+const ICON_MAP: Record<string, typeof Home> = {
+  home: Home,
+  appliances: Wrench,
+  car: Car,
+  electronics: Cpu,
+};
+
 export default function HomeScreen() {
   const featured = GUIDE_CATEGORIES.slice(0, 4);
 
@@ -28,7 +37,7 @@ export default function HomeScreen() {
             <View>
               <Text style={styles.appName}>Kumpuni</Text>
               <Text style={styles.tagline}>The DIY Home Maintenance Guide</Text>
-              <Text style={styles.dateText}>April 23, 2026</Text>
+              <Text style={styles.dateText}>{TODAY}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7}>
