@@ -22,7 +22,8 @@ const SUPPORT_EMAIL = 'r.cconstante.dev@gmail.com';
 const LINKS = [
   { id: '1', label: 'Help & Support', icon: HelpCircle, email: SUPPORT_EMAIL },
   { id: '2', label: 'Legal', icon: FileText, url: `${BASE_URL}/terms` },
-  { id: '3', label: 'Privacy', icon: Shield, url: `${BASE_URL}/privacy` },
+  { id: '3', label: 'Privacy Policy', icon: Shield, url: `${BASE_URL}/privacy` },
+  { id: '4', label: 'License', icon: Code, url: `${BASE_URL}/license` },
 ];
 
 const DEVELOPERS = [
