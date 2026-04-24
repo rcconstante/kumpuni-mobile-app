@@ -139,6 +139,7 @@ type SubmittedFixerInput = {
   description: string;
   logoUrl?: string;
   imageUrl?: string;
+  images?: string[];              // additional highlight photos (data: URIs)
   googleMapsUrl?: string;
   lat?: number;
   lng?: number;
@@ -399,15 +400,19 @@ export async function submitBusinessApplication(
   }
 
   // ---- 2. Upload images + payment proof in parallel -----------------------
-  const [logoUrl, imageUrl, paymentProofPath] = await Promise.all([
+  const extraSources = (input.images ?? []).filter(Boolean).slice(0, 4);
+  const [logoUrl, imageUrl, paymentProofPath, ...extraUrls] = await Promise.all([
     uploadBusinessImage(input.logoUrl, 'logo'),
     uploadBusinessImage(input.imageUrl, 'highlight'),
     uploadPaymentProof(input.paymentProof),
+    ...extraSources.map((src) => uploadBusinessImage(src, 'highlight')),
   ]);
 
   if (!paymentProofPath) {
     throw new Error('Payment proof screenshot is required.');
   }
+
+  const additionalImages = extraUrls.filter(Boolean) as string[];
 
   const row = {
     name,
@@ -423,6 +428,7 @@ export async function submitBusinessApplication(
     lng,
     logo_url: normalizeImageUrl(logoUrl) ?? null,
     image_url: normalizeImageUrl(imageUrl) ?? null,
+    images: additionalImages.length > 0 ? additionalImages : null,
     payment_proof_path: paymentProofPath,
     payment_reference: paymentReference,
     status: 'pending' as BusinessApplicationStatus,

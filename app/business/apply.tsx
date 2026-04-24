@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, ChevronDown, QrCode, CheckCircle2, Upload } from 'lucide-react-native';
+import { ArrowLeft, ChevronDown, QrCode, CheckCircle2, Upload, X } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -23,72 +23,120 @@ import {
 
 const STEPS = ['Details', 'Payment', 'Done'] as const;
 
+const COUNTRIES = [
+  'Philippines', 'Singapore', 'Malaysia', 'Indonesia', 'Thailand',
+  'Vietnam', 'Myanmar', 'Cambodia', 'Brunei', 'United States',
+  'United Kingdom', 'Australia', 'Canada', 'Japan', 'South Korea',
+  'China', 'India', 'Other',
+];
+
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/i;
+const PHONE_RE = /^[+\d\s\-()\\.]{7,40}$/;
+
 export default function ApplyBusinessScreen() {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Form state
   const [name, setName] = useState('');
   const [category, setCategory] = useState<BusinessCategory>('Home');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
-  const [country, setCountry] = useState('');
+  const [country, setCountry] = useState('Philippines');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [description, setDescription] = useState('');
   const [googleMapsUrl, setGoogleMapsUrl] = useState('');
   const [businessLogo, setBusinessLogo] = useState<string | null>(null);
-  const [highlightImage, setHighlightImage] = useState<string | null>(null);
+  const [highlightImages, setHighlightImages] = useState<string[]>([]);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
 
   // Payment state
   const [paymentProof, setPaymentProof] = useState<string | null>(null);
   const [paymentReference, setPaymentReference] = useState('');
   const [processing, setProcessing] = useState(false);
 
-  const canNext = () => {
-    if (step === 0) return name && address && city && country && phone && email && googleMapsUrl.trim();
-    if (step === 1) return !!paymentProof;
-    return true;
+  const clearError = (field: string) =>
+    setErrors((prev) => ({ ...prev, [field]: '' }));
+
+  const validateStep0 = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!name.trim()) e.name = 'Business name is required.';
+    if (!address.trim()) e.address = 'Address is required.';
+    if (!city.trim()) e.city = 'City is required.';
+    if (!phone.trim()) e.phone = 'Contact number is required.';
+    else if (!PHONE_RE.test(phone.trim()))
+      e.phone = 'Enter a valid phone number (digits, +, spaces or dashes).';
+    if (!email.trim()) e.email = 'Email is required.';
+    else if (!EMAIL_RE.test(email.trim()))
+      e.email = 'Enter a valid email address (e.g. business@gmail.com).';
+    if (!googleMapsUrl.trim()) e.googleMapsUrl = 'Google Maps link is required.';
+    else if (!/^https?:\/\//i.test(googleMapsUrl.trim()))
+      e.googleMapsUrl = 'Must start with https:// — paste the share link from Google Maps.';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const pickBusinessImage = async (kind: 'logo' | 'highlight' | 'proof') => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        'Permission needed',
-        'Please allow photo library access to upload your image.'
-      );
+  const handleBack = () => {
+    if (step === 0) router.back();
+    else setStep((s) => s - 1);
+  };
+
+  const pickImage = async (kind: 'logo' | 'highlight' | 'proof') => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Please allow photo library access to upload images.');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsMultipleSelection: kind === 'highlight',
+      selectionLimit: kind === 'highlight' ? 5 : 1,
+      allowsEditing: kind !== 'highlight',
       quality: 0.8,
       base64: true,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      // Hard size cap (~5 MB after base64 ≈ 6.7 MB string). Reject early.
-      if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
-        Alert.alert('Image too large', 'Please choose an image under 5 MB.');
-        return;
-      }
-      const imageSource =
-        asset.base64 && asset.mimeType
-          ? `data:${asset.mimeType};base64,${asset.base64}`
-          : asset.uri;
+    if (result.canceled) return;
 
-      if (kind === 'logo') setBusinessLogo(imageSource);
-      else if (kind === 'highlight') setHighlightImage(imageSource);
-      else setPaymentProof(imageSource);
+    const toDataUri = (asset: ImagePicker.ImagePickerAsset): string | null => {
+      if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+        Alert.alert('Image too large', 'Please choose images under 5 MB each.');
+        return null;
+      }
+      return asset.base64 && asset.mimeType
+        ? `data:${asset.mimeType};base64,${asset.base64}`
+        : asset.uri;
+    };
+
+    if (kind === 'logo') {
+      const uri = toDataUri(result.assets[0]);
+      if (uri) setBusinessLogo(uri);
+    } else if (kind === 'highlight') {
+      const uris = result.assets.map(toDataUri).filter(Boolean) as string[];
+      setHighlightImages((prev) => [...prev, ...uris].slice(0, 5));
+    } else {
+      const uri = toDataUri(result.assets[0]);
+      if (uri) setPaymentProof(uri);
     }
   };
 
+  const removeHighlight = (index: number) =>
+    setHighlightImages((prev) => prev.filter((_, i) => i !== index));
+
+  const canNext = () => {
+    if (step === 1) return !!paymentProof;
+    return true;
+  };
+
   const handleNext = () => {
-    if (step === 1) {
+    if (step === 0) {
+      if (!validateStep0()) return;
+      setStep(1);
+    } else if (step === 1) {
       if (!paymentProof) {
         Alert.alert('Payment proof required', 'Please upload a screenshot of your payment.');
         return;
@@ -103,9 +151,10 @@ export default function ApplyBusinessScreen() {
         phone,
         email,
         description,
-        logoUrl: businessLogo || undefined,
-        imageUrl: highlightImage || undefined,
         googleMapsUrl,
+        logoUrl: businessLogo || undefined,
+        imageUrl: highlightImages[0] || undefined,
+        images: highlightImages.slice(1),
         paymentProof,
         paymentReference,
       })
@@ -120,18 +169,16 @@ export default function ApplyBusinessScreen() {
             err?.message ?? 'Could not submit your application. Please try again.'
           );
         });
-    } else {
-      setStep(step + 1);
     }
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} activeOpacity={0.7} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backBtn} activeOpacity={0.7} onPress={handleBack}>
           <ArrowLeft size={22} color="#1F2937" strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Highlight Your Business</Text>
+        <Text style={styles.headerTitle}>List Your Business</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -165,23 +212,32 @@ export default function ApplyBusinessScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* ── Step 0: Details ── */}
           {step === 0 && (
             <>
-              <Text style={styles.label}>Business Name</Text>
+              <Text style={styles.label}>Business Name *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, !!errors.name && styles.inputError]}
                 placeholder="e.g. Manila Pipe Masters"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(t) => { setName(t); clearError('name'); }}
                 placeholderTextColor="#9CA3AF"
               />
+              {!!errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-              <Text style={styles.label}>Category</Text>
+              <Text style={styles.label}>Category *</Text>
               <TouchableOpacity
                 style={styles.select}
                 activeOpacity={0.8}
-                onPress={() => setShowCategoryPicker(!showCategoryPicker)}
+                onPress={() => {
+                  setShowCategoryPicker(!showCategoryPicker);
+                  setShowCountryPicker(false);
+                }}
               >
                 <Text style={styles.selectText}>{category}</Text>
                 <ChevronDown size={18} color="#6B7280" />
@@ -197,80 +253,109 @@ export default function ApplyBusinessScreen() {
                         setShowCategoryPicker(false);
                       }}
                     >
-                      <Text style={styles.pickerItemText}>{c}</Text>
+                      <Text style={[styles.pickerItemText, category === c && styles.pickerItemActive]}>
+                        {c}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               )}
 
-              <Text style={styles.label}>Address</Text>
+              <Text style={styles.label}>Address *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, !!errors.address && styles.inputError]}
                 placeholder="Full business address"
                 value={address}
-                onChangeText={setAddress}
+                onChangeText={(t) => { setAddress(t); clearError('address'); }}
                 placeholderTextColor="#9CA3AF"
               />
+              {!!errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
 
               <View style={styles.row}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>City</Text>
+                  <Text style={styles.label}>City *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, !!errors.city && styles.inputError]}
                     placeholder="City"
                     value={city}
-                    onChangeText={setCity}
+                    onChangeText={(t) => { setCity(t); clearError('city'); }}
                     placeholderTextColor="#9CA3AF"
                   />
+                  {!!errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
                 </View>
-                <View style={{ width: 16 }} />
+                <View style={{ width: 12 }} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>Country</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Country"
-                    value={country}
-                    onChangeText={setCountry}
-                    placeholderTextColor="#9CA3AF"
-                  />
+                  <Text style={styles.label}>Country *</Text>
+                  <TouchableOpacity
+                    style={styles.select}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      setShowCountryPicker(!showCountryPicker);
+                      setShowCategoryPicker(false);
+                    }}
+                  >
+                    <Text style={[styles.selectText, { fontSize: 13 }]} numberOfLines={1}>
+                      {country}
+                    </Text>
+                    <ChevronDown size={15} color="#6B7280" />
+                  </TouchableOpacity>
                 </View>
               </View>
+              {showCountryPicker && (
+                <View style={styles.picker}>
+                  {COUNTRIES.map((c) => (
+                    <TouchableOpacity
+                      key={c}
+                      style={styles.pickerItem}
+                      onPress={() => { setCountry(c); setShowCountryPicker(false); }}
+                    >
+                      <Text style={[styles.pickerItemText, country === c && styles.pickerItemActive]}>
+                        {c}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
 
-              <Text style={styles.label}>Contact Number</Text>
+              <Text style={styles.label}>Contact Number *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, !!errors.phone && styles.inputError]}
                 placeholder="+63 912 345 6789"
                 value={phone}
-                onChangeText={setPhone}
+                onChangeText={(t) => { setPhone(t); clearError('phone'); }}
                 keyboardType="phone-pad"
                 placeholderTextColor="#9CA3AF"
               />
+              {!!errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
 
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email *</Text>
               <TextInput
-                style={styles.input}
-                placeholder="business@email.com"
+                style={[styles.input, !!errors.email && styles.inputError]}
+                placeholder="business@gmail.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(t) => { setEmail(t.trim()); clearError('email'); }}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
                 placeholderTextColor="#9CA3AF"
               />
+              {!!errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-              <Text style={styles.label}>Google Maps Link</Text>
+              <Text style={styles.label}>Google Maps Link *</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, !!errors.googleMapsUrl && styles.inputError]}
                 placeholder="Paste your Google Maps share link"
                 value={googleMapsUrl}
-                onChangeText={setGoogleMapsUrl}
+                onChangeText={(t) => { setGoogleMapsUrl(t); clearError('googleMapsUrl'); }}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="url"
                 placeholderTextColor="#9CA3AF"
               />
-              <Text style={styles.helperText}>
-                Use the Google Maps share link for your business location so customers can open it directly.
-              </Text>
+              {!!errors.googleMapsUrl
+                ? <Text style={styles.errorText}>{errors.googleMapsUrl}</Text>
+                : <Text style={styles.helperText}>Open Google Maps → Share → Copy link, then paste here.</Text>
+              }
 
               <Text style={styles.label}>Description</Text>
               <TextInput
@@ -284,57 +369,59 @@ export default function ApplyBusinessScreen() {
               />
 
               <Text style={styles.label}>Business Logo (optional)</Text>
-              <TouchableOpacity
-                style={styles.uploadBtn}
-                activeOpacity={0.8}
-                onPress={() => pickBusinessImage('logo')}
-              >
+              <TouchableOpacity style={styles.uploadBtn} activeOpacity={0.8} onPress={() => pickImage('logo')}>
                 <Text style={styles.uploadBtnText}>
-                  {businessLogo ? 'Change Business Logo' : 'Upload Business Logo'}
+                  {businessLogo ? 'Change Logo' : 'Upload Business Logo'}
                 </Text>
               </TouchableOpacity>
-              <Text style={styles.helperText}>
-                This logo is used for your business branding in cards and admin views.
-              </Text>
               {businessLogo && (
-                <Image
-                  source={{ uri: businessLogo }}
-                  style={styles.logoPreview}
-                  resizeMode="contain"
-                />
+                <Image source={{ uri: businessLogo }} style={styles.logoPreview} resizeMode="contain" />
               )}
 
-              <Text style={styles.label}>Highlight Picture</Text>
+              <Text style={styles.label}>Highlight Photos (up to 5)</Text>
+              <Text style={styles.helperText}>
+                These photos appear in your business listing. You can select multiple at once.
+              </Text>
               <TouchableOpacity
-                style={styles.uploadBtn}
+                style={[styles.uploadBtn, highlightImages.length >= 5 && styles.uploadBtnDisabled]}
                 activeOpacity={0.8}
-                onPress={() => pickBusinessImage('highlight')}
+                onPress={() => pickImage('highlight')}
+                disabled={highlightImages.length >= 5}
               >
+                <Upload size={16} color="#374151" />
                 <Text style={styles.uploadBtnText}>
-                  {highlightImage ? 'Change Highlight Picture' : 'Upload Highlight Picture'}
+                  {highlightImages.length === 0 ? 'Choose Photos' : `Add More (${highlightImages.length}/5)`}
                 </Text>
               </TouchableOpacity>
-              <Text style={styles.helperText}>
-                This picture will be shown when your highlighted business appears in fixer listings.
-              </Text>
-              {highlightImage && (
-                <Image
-                  source={{ uri: highlightImage }}
-                  style={styles.uploadPreview}
-                  resizeMode="cover"
-                />
+              {highlightImages.length > 0 && (
+                <View style={styles.imageGrid}>
+                  {highlightImages.map((uri, idx) => (
+                    <View key={idx} style={styles.imageGridItem}>
+                      <Image source={{ uri }} style={styles.imageGridThumb} resizeMode="cover" />
+                      <TouchableOpacity style={styles.removeBtn} onPress={() => removeHighlight(idx)}>
+                        <X size={11} color="#FFFFFF" />
+                      </TouchableOpacity>
+                      {idx === 0 && (
+                        <View style={styles.mainBadge}>
+                          <Text style={styles.mainBadgeText}>Main</Text>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
               )}
             </>
           )}
 
+          {/* ── Step 1: Payment ── */}
           {step === 1 && (
             <>
               <View style={styles.paymentHeader}>
                 <QrCode size={32} color="#6DBE75" />
                 <Text style={styles.paymentTitle}>Scan to Pay</Text>
                 <Text style={styles.paymentSub}>
-                  Use your bank or e-wallet app to scan the QR code below, then upload
-                  the screenshot of your payment confirmation.
+                  Scan the QR code below with your bank or e-wallet app, then upload
+                  a screenshot of your payment confirmation.
                 </Text>
               </View>
 
@@ -344,7 +431,7 @@ export default function ApplyBusinessScreen() {
                   style={styles.qrImage}
                   resizeMode="contain"
                 />
-                <Text style={styles.qrCaption}>Kumpuni Business Listing • ₱999</Text>
+                <Text style={styles.qrCaption}>Kumpuni Business Listing • ₱200</Text>
               </View>
 
               <Text style={styles.label}>Reference Number / Sender Name</Text>
@@ -361,33 +448,24 @@ export default function ApplyBusinessScreen() {
               </Text>
 
               <Text style={styles.label}>Payment Proof Screenshot *</Text>
-              <TouchableOpacity
-                style={styles.uploadBtn}
-                activeOpacity={0.8}
-                onPress={() => pickBusinessImage('proof')}
-              >
+              <TouchableOpacity style={styles.uploadBtn} activeOpacity={0.8} onPress={() => pickImage('proof')}>
                 <Upload size={16} color="#374151" />
                 <Text style={styles.uploadBtnText}>
-                  {paymentProof ? 'Change Payment Screenshot' : 'Upload Payment Screenshot'}
+                  {paymentProof ? 'Change Screenshot' : 'Upload Payment Screenshot'}
                 </Text>
               </TouchableOpacity>
               <Text style={styles.helperText}>
-                Upload a clear screenshot showing the amount, date and reference number.
-                Max 5 MB. Stored privately and only visible to Kumpuni admins.
+                Clear screenshot showing amount, date, and reference number. Max 5 MB.
               </Text>
               {paymentProof && (
-                <Image
-                  source={{ uri: paymentProof }}
-                  style={styles.uploadPreview}
-                  resizeMode="cover"
-                />
+                <Image source={{ uri: paymentProof }} style={styles.uploadPreview} resizeMode="cover" />
               )}
 
               <View style={styles.summaryCard}>
                 <Text style={styles.summaryTitle}>Plan Summary</Text>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Business Listing</Text>
-                  <Text style={styles.summaryValue}>₱999 / month</Text>
+                  <Text style={styles.summaryValue}>₱200</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Highlight Badge</Text>
@@ -395,12 +473,13 @@ export default function ApplyBusinessScreen() {
                 </View>
                 <View style={[styles.summaryRow, styles.summaryTotal]}>
                   <Text style={styles.summaryLabelTotal}>Total</Text>
-                  <Text style={styles.summaryValueTotal}>₱999</Text>
+                  <Text style={styles.summaryValueTotal}>₱200</Text>
                 </View>
               </View>
             </>
           )}
 
+          {/* ── Step 2: Done ── */}
           {step === 2 && (
             <View style={styles.success}>
               <View style={styles.successCircle}>
@@ -409,7 +488,7 @@ export default function ApplyBusinessScreen() {
               <Text style={styles.successTitle}>Application Submitted!</Text>
               <Text style={styles.successText}>
                 Your business is pending manual verification. We will review your details and
-                contact you via email within 2-3 business days.
+                contact you via email within 2–3 business days.
               </Text>
               <TouchableOpacity
                 style={styles.doneBtn}
@@ -424,15 +503,23 @@ export default function ApplyBusinessScreen() {
       </KeyboardAvoidingView>
 
       {step < 2 && (
-        <View style={styles.footer}>
+        <View style={[styles.footer, step > 0 && styles.footerRow]}>
+          {step > 0 && (
+            <TouchableOpacity style={styles.backFooterBtn} activeOpacity={0.8} onPress={handleBack}>
+              <Text style={styles.backFooterBtnText}>← Back</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
-            style={[styles.nextBtn, (!canNext() || processing) && styles.nextBtnDisabled]}
+            style={[
+              styles.nextBtn,
+              (!canNext() || processing) && styles.nextBtnDisabled,
+            ]}
             activeOpacity={0.8}
-            disabled={!canNext() || processing}
+            disabled={processing}
             onPress={handleNext}
           >
             <Text style={styles.nextBtnText}>
-              {processing ? 'Processing...' : step === 1 ? 'Submit Application' : 'Continue'}
+              {processing ? 'Submitting...' : step === 1 ? 'Submit Application' : 'Continue'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -480,6 +567,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
+  inputError: { borderColor: '#EF4444' },
+  errorText: { fontSize: 12, color: '#EF4444', marginTop: 4, lineHeight: 16 },
   helperText: { fontSize: 12, color: '#6B7280', marginTop: 6, lineHeight: 18 },
   textarea: { height: 90, textAlignVertical: 'top', paddingTop: 12 },
   uploadBtn: {
@@ -494,6 +583,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     marginTop: 2,
   },
+  uploadBtnDisabled: { opacity: 0.4 },
   uploadBtnText: { fontSize: 13, fontWeight: '700', color: '#374151' },
   uploadPreview: {
     width: '100%',
@@ -512,6 +602,20 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     backgroundColor: '#FFFFFF',
   },
+  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  imageGridItem: { width: 90, height: 90, borderRadius: 12, overflow: 'hidden', position: 'relative' },
+  imageGridThumb: { width: 90, height: 90 },
+  removeBtn: {
+    position: 'absolute', top: 4, right: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10,
+    width: 20, height: 20, alignItems: 'center', justifyContent: 'center',
+  },
+  mainBadge: {
+    position: 'absolute', bottom: 4, left: 4,
+    backgroundColor: '#6DBE75', borderRadius: 6,
+    paddingHorizontal: 5, paddingVertical: 2,
+  },
+  mainBadgeText: { fontSize: 9, fontWeight: '700', color: '#FFFFFF' },
   select: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
@@ -523,7 +627,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  selectText: { fontSize: 14, color: '#1F2937' },
+  selectText: { fontSize: 14, color: '#1F2937', flex: 1 },
   picker: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
@@ -534,6 +638,7 @@ const styles = StyleSheet.create({
   },
   pickerItem: { paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   pickerItemText: { fontSize: 14, color: '#1F2937' },
+  pickerItemActive: { color: '#6DBE75', fontWeight: '700' },
   paymentHeader: { alignItems: 'center', marginVertical: 20, gap: 8 },
   paymentTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937' },
   paymentSub: { fontSize: 12, color: '#6B7280', textAlign: 'center', paddingHorizontal: 12, lineHeight: 18 },
@@ -564,7 +669,13 @@ const styles = StyleSheet.create({
   doneBtn: { backgroundColor: '#6DBE75', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32, marginTop: 16 },
   doneBtnText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
   footer: { paddingHorizontal: 20, paddingVertical: 16, backgroundColor: '#F7F7F5' },
-  nextBtn: { backgroundColor: '#6DBE75', borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
+  footerRow: { flexDirection: 'row', gap: 12 },
+  backFooterBtn: {
+    backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 20,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#E5E7EB',
+  },
+  backFooterBtnText: { fontSize: 14, fontWeight: '700', color: '#374151' },
+  nextBtn: { backgroundColor: '#6DBE75', borderRadius: 16, paddingVertical: 14, alignItems: 'center', flex: 1 },
   nextBtnDisabled: { backgroundColor: '#D1D5DB' },
   nextBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 });
