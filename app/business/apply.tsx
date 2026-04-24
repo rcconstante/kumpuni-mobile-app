@@ -11,7 +11,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, ChevronDown, QrCode, CheckCircle2, Upload, X } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -35,6 +35,7 @@ const PHONE_RE = /^[+\d\s\-()\\.]{7,40}$/;
 
 export default function ApplyBusinessScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -503,7 +504,7 @@ export default function ApplyBusinessScreen() {
       </KeyboardAvoidingView>
 
       {step < 2 && (
-        <View style={[styles.footer, step > 0 && styles.footerRow]}>
+        <View style={[styles.footer, step > 0 && styles.footerRow, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           {step > 0 && (
             <TouchableOpacity style={styles.backFooterBtn} activeOpacity={0.8} onPress={handleBack}>
               <Text style={styles.backFooterBtnText}>← Back</Text>

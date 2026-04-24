@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "Kumpuni",
+    "name": "Kumpuni - Guide",
     "slug": "kumpuni",
     "version": "1.0.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "kumpuni",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -17,10 +17,16 @@
       "backgroundColor": "#FFFFFF"
     },
     "ios": {
-      "bundleIdentifier": "com.kumpuni.app",
+      "bundleIdentifier": "com.kumpuniguide.app",
       "buildNumber": "1",
-      "supportsTablet": true,
-      "requireFullScreen": false,
+      "supportsTablet": false,
+      "requireFullScreen": true,
+      "icon": "./assets/images/icon.png",
+      "splash": {
+        "image": "./assets/images/logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFFFFF"
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Kumpuni uses your location to show nearby fixers and service providers in your area.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Kumpuni uses your location to show nearby fixers and service providers in your area.",
@@ -30,22 +36,66 @@
         "NSMicrophoneUsageDescription": "Microphone access is not used by Kumpuni.",
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIDeviceFamily": [
+          1
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false
       },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
+          }
+        ]
+      },
       "associatedDomains": []
     },
     "android": {
-      "package": "com.kumpuni.app",
+      "package": "com.kumpuniguide.app",
       "versionCode": 1,
+      "icon": "./assets/images/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "splash": {
+        "image": "./assets/images/logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFFFFF"
+      },
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "CAMERA"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -76,9 +126,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": ""
-      }
-    }
+        "projectId": "63626403-b4df-4181-a6e2-041c2d93eaf9"
+      },
+      "router": {}
+    },
+    "owner": "rcconstante"
   }
 }
-

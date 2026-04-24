@@ -9,7 +9,6 @@ import {
   Code,
   Globe,
   Moon,
-  Star,
   ChevronRight,
   ExternalLink,
   Mail,
@@ -117,12 +116,6 @@ export default function SettingsScreen() {
           ))}
         </View>
 
-        {/* Rate */}
-        <TouchableOpacity style={styles.rateBtn} activeOpacity={0.8}>
-          <Star size={20} color="#F59E0B" fill="#F59E0B" strokeWidth={0} />
-          <Text style={styles.rateText}>Rate 5 Stars</Text>
-        </TouchableOpacity>
-
         {/* Links */}
         <View style={styles.menu}>
           {LINKS.map((m) => {
@@ -155,8 +148,6 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
   menuLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: '#374151' },
   menuValue: { fontSize: 13, fontWeight: '500', color: '#9CA3AF' },
-  rateBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'center', marginTop: 30, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 12, paddingHorizontal: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-  rateText: { fontSize: 14, fontWeight: '700', color: '#1F2937' },
   devList: { marginTop: 24, gap: 10 },
   devCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
   devName: { fontSize: 14, fontWeight: '700', color: '#1F2937' },
